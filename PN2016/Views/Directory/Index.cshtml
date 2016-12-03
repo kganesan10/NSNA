@@ -1,0 +1,316 @@
+﻿@{
+    ViewBag.Title = "2016 Directory";
+}
+
+<section>
+    <h2 id="content"><a name="directory"></a>2016 Directory (NY/NJ/CT)</h2>
+    <p>
+        As part of 2016 PN function we planned to collect contact information of Nagarathars in our region. <br />
+        Please fill out the below form and submit the information for this year directory. The directory will be available on request.
+        <h2>This form is currently not active</h2>
+    </p>
+    <div class="row">
+
+    </div>
+</section>
+<section>
+    <div class="row">
+        <div class="11u$ 12u$(medium)">
+            <form method="post" action="#">
+                <h3>Contact Info. Form</h3>
+                <div class="row uniform" id="primary">
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="p1.FirstName" id="p1.FirstName" value="" placeholder="First Name" required />
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="p1.LastName" id="p1.LastName" value="" placeholder="Last Name" required />
+                    </div>
+                    <div class="3u 12u$(small)">
+                        <input type="radio" id="p1.Sex_Male" name="p1.Sex">
+                        <label for="p1.Sex_Male">Chettiar</label>
+                    </div>
+                    <div class="3u 12u$(small)">
+                        <input type="radio" id="p1.Sex_Female" name="p1.Sex">
+                        <label for="p1.Sex_Female">Aachi</label>
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <input type="email" name="p1.Email" id="p1.Email" value="" placeholder="Email" required />
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="p1.HomePhone" id="p1.HomePhone" value="" placeholder="Home Phone#" />
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="p1.MobilePhone" id="p1.MobilePhone" value="" placeholder="Mobile Phone#" />
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="p1.City" id="p1.City" value="" placeholder="US-City" />
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <div class="select-wrapper">
+                            <select name="p1.State" id="p1.State">
+                                <option value=""> US-State</option>
+                                <option value="NJ">New Jersey</option>
+                                <option value="NY">New York</option>
+                                <option value="CT">Connecticut</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <div class="select-wrapper">
+                            <select name="p1.Kovil" id="p1.Kovil" onChange="LoadPirivu(this.value, 'p1.Pirivu')" required>
+                                <option value=""> Select Kovil</option>
+                                <option value="Ilayatrangudi">Ilayatrangudi</option>
+                                <option value="Iluppakudi">Iluppakudi</option>
+                                <option value="Iraniyur">Iraniyur</option>
+                                <option value="Mathur">Mathur</option>
+                                <option value="Nemam_Kovil">Nemam Kovil</option>
+                                <option value="Pillaiyarpatti">Pillaiyarpatti</option>
+                                <option value="Soorakudi">Soorakudi</option>
+                                <option value="Vairavan_Kovil">Vairavan Koil</option>
+                                <option value="Velangudi">Velangudi</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <div class="select-wrapper">
+                            <select name="p1.Pirivu" id="p1.Pirivu">
+                                <option value=""> Select Pirivu</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="p1.NativePlace" id="p1.NativePlace" value="" placeholder="Native Place" required />
+                    </div>
+                    <div class="3u 12u$(small)">
+                        <input type="radio" id="p1.MartialStatus_Single" name="p1.MartialStatus" value="single" onchange="ToogleSecForm(this.value)">
+                        <label for="p1.MartialStatus_Single">Single</label>
+                    </div>
+                    <div class="3u 12u$(small)">
+                        <input type="radio" id="p1.MartialStatus_Married" name="p1.MartialStatus" value="married" onchange="ToogleSecForm(this.value)">
+                        <label for="p1.MartialStatus_Married">Married</label>
+                    </div>
+                    <!-- Break -->
+                </div>
+                <!-- Break -->
+                <div class="row uniform" id="spouse" name="spouse" style="display:none;">
+                    <div class="12u 12u$(xsmall)">
+                        <h3>Spouse Information</h3>
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="s1.FirstName" id="s1.FirstName" value="" placeholder="First Name" />
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="s1.LastName" id="s1.LastName" value="" placeholder="Last Name" />
+                    </div>
+                    <div class="12u 12u$(xsmall)">
+                        <h5>Please provide at birth information for the following</h5>
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <div class="select-wrapper">
+                            <select name="s1.Kovil" id="s1.Kovil" onChange="LoadPirivu(this.value, 's1.Pirivu')">
+                                <option value=""> Select Kovil</option>
+                                <option value="Ilayatrangudi">Ilayatrangudi</option>
+                                <option value="Iluppakudi">Iluppakudi</option>
+                                <option value="Iraniyur">Iraniyur</option>
+                                <option value="Mathur">Mathur</option>
+                                <option value="Nemam_Kovil">Nemam Kovil</option>
+                                <option value="Pillaiyarpatti">Pillaiyarpatti</option>
+                                <option value="Soorakudi">Soorakudi</option>
+                                <option value="Vairavan_Kovil">Vairavan Koil</option>
+                                <option value="Velangudi">Velangudi</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <div class="select-wrapper">
+                            <select name="s1.Pirivu" id="s1.Pirivu">
+                                <option value=""> Select Pirivu</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="s1.NativePlace" id="s1.NativePlace" value="" placeholder="Native Place" />
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                    </div>
+
+                    <div class="12u 12u$(xsmall)">
+                        <h3>Kids Information. Please fill age as of 01/01/2017.</h3>
+                    </div>
+
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="k1.FirstName" id="k1.FirstName" value="" placeholder="First Name" />
+                    </div>
+                    <div class="3u 12u$(xsmall)">
+                        <input type="text" name="k1.Age" id="k1.Age" value="" placeholder="Age" />
+                    </div>
+                    <div class="3u 12u$(xsmall)">
+                        <div class="select-wrapper">
+                            <select name="k1.Sex" id="k1.Sex">
+                                <option value=""> Choose</option>
+                                <option value="F">Female</option>
+                                <option value="M">Male</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Break -->
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="k2.FirstName" id="k2.FirstName" value="" placeholder="First Name" />
+                    </div>
+                    <div class="3u 12u$(xsmall)">
+                        <input type="text" name="k2.Age" id="k2.Age" value="" placeholder="Age" />
+                    </div>
+                    <div class="3u 12u$(xsmall)">
+                        <div class="select-wrapper">
+                            <select name="k2.Sex" id="k2.Sex">
+                                <option value=""> Choose</option>
+                                <option value="F">Female</option>
+                                <option value="M">Male</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Break -->
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="k3.FirstName" id="k3.FirstName" value="" placeholder="First Name" />
+                    </div>
+                    <div class="3u 12u$(xsmall)">
+                        <input type="text" name="k3.Age" id="k3.Age" value="" placeholder="Age" />
+                    </div>
+                    <div class="3u 12u$(xsmall)">
+                        <div class="select-wrapper">
+                            <select name="k3.Sex" id="k3.Sex">
+                                <option value=""> Choose</option>
+                                <option value="F">Female</option>
+                                <option value="M">Male</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row uniform" id="addKids">
+                        <div class="3u 12u$(xsmall)">
+                            <ul class="actions">
+                                <li><a href="javascript:AddMore()" class="button special">Add More</a></li>
+                            </ul>
+                        </div>
+                        <div class="9u 12u$(xsmall)">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row uniform" id="kids+" name="kids+" style="display:none;">
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="k4.FirstName" id="k4.FirstName" value="" placeholder="First Name" />
+                    </div>
+                    <div class="3u 12u$(xsmall)">
+                        <input type="text" name="k4.Age" id="k4.Age" value="" placeholder="Age" />
+                    </div>
+                    <div class="3u 12u$(xsmall)">
+                        <div class="select-wrapper">
+                            <select name="k4.Sex" id="k4.Sex">
+                                <option value=""> Choose</option>
+                                <option value="F">Female</option>
+                                <option value="M">Male</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Break -->
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="k5.FirstName" id="k5.FirstName" value="" placeholder="First Name" />
+                    </div>
+                    <div class="3u 12u$(xsmall)">
+                        <input type="text" name="k5.Age" id="k5.Age" value="" placeholder="Age" />
+                    </div>
+                    <div class="3u 12u$(xsmall)">
+                        <div class="select-wrapper">
+                            <select name="k5.Sex" id="k5.Sex">
+                                <option value=""> Choose</option>
+                                <option value="F">Female</option>
+                                <option value="M">Male</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Break -->
+                <div class="row uniform">
+                    <div class="12u$">
+                        <ul class="actions">
+                            <li><input type="submit" value="Submit Info." class="special" /></li>
+                            <li><input type="reset" value="Reset" /></li>
+                        </ul>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section JavaScript{
+    <script src="~/assets/js/skel.min.js"></script>
+    <script src="~/assets/js/util.js"></script>
+    <script src="~/assets/js/main.js"></script>
+    <script>
+        var data = {
+            "kovils": {
+                "Ilayatrangudi": ["Kazhani Vaasarkkudaiyar","Kinginikkoorudaiyar","Okkurudaiyar","Pattanasamiyar","Perusenthurudaiyar","Sirusenthurudaiyar","Perumaruthurudaiyar"],
+                "Mathur": ["Arumbakkur", "Kannur", "Karuppur", "Kulathur", "Mannur", "Manalur", "Uraiyur"],
+                "Vairavan_Kovil": ["Kazhani Vaasarkkudaiyar","Maruthenthirapuram","Periya vahuppu","Pilliyar vahuppu","Theyyanar vahuppu"]
+            }
+        }
+
+        function LoadPirivu(kovilname, target)
+        {
+            var pirivus = data.kovils[kovilname];
+            var selectHtml = "<option value=''> Choose Pirivu</option>";
+            if (pirivus)
+            {
+                for (var i = 0; i < pirivus.length; i++) {
+                    selectHtml += "<option value='" + pirivus[i] + "'>" + pirivus[i] + "</option>";
+                }
+            }
+            else
+            {
+                var selectHtml = "<option value=''> No Pirivu</option>";
+            }
+            document.getElementById(target).innerHTML = selectHtml;
+        }
+
+        function ToogleSecForm(mstatus)
+        {
+            var secForm = document.getElementById('spouse');
+            if (mstatus != 'single')
+            {
+                secForm.style.display = "block";
+                SpouseFormValidation(true);
+            }
+            else
+            {
+                secForm.style.display = "none";
+                SpouseFormValidation(false);
+            }
+            KidsReset();
+        }
+        function AddMore()
+        {
+            document.getElementById('addKids').style.display = "none";
+            document.getElementById('kids+').style.display = "block";
+        }
+        function KidsReset()
+        {
+            document.getElementById('addKids').style.display = "block";
+            document.getElementById('kids+').style.display = "none";
+        }
+        function SpouseFormValidation(status)
+        {
+            var fields = ["s1.FirstName", "s1.LastName", "s1.Kovil", "s1.NativePlace"];
+            for (var index in fields)
+            {
+                var field = fields[index];
+                document.getElementById(field).required = status;
+            };
+        }
+
+    </script>
+}
