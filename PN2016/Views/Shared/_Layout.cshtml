@@ -1,44 +1,104 @@
 ﻿<!DOCTYPE html>
+       
 <html>
 <head>
+    <title>@ViewBag.Title - NSNA North East</title>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
-    @Styles.Render("~/Content/css")
-    @Scripts.Render("~/bundles/modernizr")
-
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+    <link rel="stylesheet" href="~/assets/css/main.css" />
+    <!--[if lte IE 9]><link rel="stylesheet" href="~/assets/css/ie9.css" /><![endif]-->
+    <!--[if lte IE 8]><link rel="stylesheet" href="~/assets/css/ie8.css" /><![endif]-->
+    <meta name="description" content="North America Nagarathar Sangam NSNA - North East 2016 Pillayar Nonbu">
+    <meta name="keywords" content="NSNA, NSNA-NE, Pillayar Nonbu, NJ Nagarathar, NY Nagarathar, CT Nagarathar, USA Nagarathars, Chettiars">
+    <meta name="author" content="Karuppiah Ganesan, KG TECHNOLOGY SOLUTIONS INC">
 </head>
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
-                    <li>@Html.ActionLink("About", "About", "Home")</li>
-                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
-                </ul>
-                @Html.Partial("_LoginPartial")
+
+    <!-- Wrapper -->
+    <div id="wrapper">
+
+        <!-- Main -->
+        <div id="main">
+            <div class="inner">
+                <!-- Header -->
+                <header id="header">
+                    <span class="logo">
+                        <img src="~/images/logo.png" alt="NSNA" align="left">
+                        <br /><strong>Nagarathar Sangam of <br />North America</strong> - North East
+                    </span>
+                    <!--
+                    <ul class="icons">
+                        <li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+                        <li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+                        <li><a href="#" class="icon fa-snapchat-ghost"><span class="label">Snapchat</span></a></li>
+                        <li><a href="#" class="icon fa-instagram"><span class="label">Instagram</span></a></li>
+                        <li><a href="#" class="icon fa-medium"><span class="label">Medium</span></a></li>
+                    </ul>
+                    -->
+                </header>
+                @RenderBody()
             </div>
         </div>
-    </div>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
-        </footer>
+
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <div class="inner">
+
+                <!-- Spacer -->
+                <section id="search" class="alt">
+                    <br />
+                </section>
+
+                <!-- Menu -->
+                <nav id="menu">
+                    <ul>
+                        <li><a href="/#home">Home</a></li>
+                        <li><a href="/#register">Register</a></li>
+                        <li><a href="/#venue">Venue</a></li>
+                        <li><a href="/#yelam">Yelam (Auction)</a></li>
+                        <li>
+                            <span class="opener">Events</span>
+                            <ul>
+                                <li><a href="/#event1">Bhajans</a></li>
+                                <li><a href="/#event2">Kids Activities</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="/#food">Food</a></li>
+                        <li><a href="/#sponsors">Sponsors</a></li>
+                        <li><a href="/directory">2016 Directory (NY/NJ/CT)</a></li>
+                        <li><a href="/#contactus">Contact Us</a></li>
+                    </ul>
+                </nav>
+                <!-- Footer -->
+                <footer id="footer">
+                    <p class="copyright">&copy; NSNA. All rights reserved.</p>
+                    <!--
+                    <p> Created and Maintained by <br/>
+                    KG TECHNOLOGY SOLUTIONS INC.</p>
+                    -->
+                </footer>
+            </div>
+        </div>
+
     </div>
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
-    @RenderSection("scripts", required: false)
+    <!-- Scripts -->
+    <script src="~/assets/js/jquery.min.js"></script>
+    <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+    @RenderSection("JavaScript", false);
+    
+    <!-- GA -->
+    <script>
+			  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+			  ga('create', 'UA-87283833-1', 'auto');
+			  ga('send', 'pageview');
+
+    </script>
+
 </body>
 </html>
