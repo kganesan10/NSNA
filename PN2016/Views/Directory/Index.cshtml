@@ -42,6 +42,9 @@
                     <div class="6u 12u$(xsmall)">
                         <input type="text" name="p1.MobilePhone" id="p1.MobilePhone" value="" placeholder="Mobile Phone#" />
                     </div>
+                    <div class="12u 12u$(xsmall)">
+                        <input type="email" name="p1.Address" id="p1.Address" value="" placeholder="Address" required />
+                    </div>
                     <div class="6u 12u$(xsmall)">
                         <input type="text" name="p1.City" id="p1.City" value="" placeholder="US-City" />
                     </div>
@@ -102,8 +105,14 @@
                     <div class="6u 12u$(xsmall)">
                         <input type="text" name="s1.LastName" id="s1.LastName" value="" placeholder="Last Name" />
                     </div>
+                    <div class="6u 12u$(xsmall)">
+                        <input type="email" name="s1.Email" id="s1.Email" value="" placeholder="Email"  />
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <input type="text" name="s1.MobilePhone" id="s1.MobilePhone" value="" placeholder="Mobile Phone#" />
+                    </div>
                     <div class="12u 12u$(xsmall)">
-                        <h5>Please provide at birth information for the following</h5>
+                        <h5>Please provide your spouse's information at birth for the following</h5>
                     </div>
                     <div class="6u 12u$(xsmall)">
                         <div class="select-wrapper">
@@ -232,7 +241,18 @@
                     </div>
                 </div>
 
-
+                <!-- Break -->
+                <div class="row uniform">
+                    <div class="12u 12u$(xsmall)">
+                        <h3>Family Picture:</h3>
+                    </div>
+                    <div class="6u 12u$(medium)">
+                        <input type="file" name="f1.Image" id="f1.Image" value="" placeholder="Upload Pic" />
+                    </div>
+                    <div class="6u 12u$(medium)">
+                        <img id="f1.ImagePreview" />
+                    </div>
+                </div>
                 <!-- Break -->
                 <div class="row uniform">
                     <div class="12u$">
@@ -259,6 +279,18 @@
                 "Vairavan_Kovil": ["Kazhani Vaasarkkudaiyar","Maruthenthirapuram","Periya vahuppu","Pilliyar vahuppu","Theyyanar vahuppu"]
             }
         }
+
+        document.getElementById("f1.Image").onchange = function () {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                // get loaded data and render thumbnail.
+                document.getElementById("f1.ImagePreview").src = e.target.result;
+            };
+
+            // read the image file as a data URL.
+            reader.readAsDataURL(this.files[0]);
+        };
 
         function LoadPirivu(kovilname, target)
         {
