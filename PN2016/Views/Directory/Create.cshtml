@@ -1,4 +1,5 @@
-﻿@{
+﻿@model PN2016.Models.ContactInfoViewModel
+@{
     ViewBag.Title = "2016 Directory";
 }
 
@@ -16,41 +17,49 @@
 <section>
     <div class="row">
         <div class="11u$ 12u$(medium)">
-            <form method="post" action="#">
+            @using (Html.BeginForm("Create", "Directory", FormMethod.Post, new { encType = "multipart/form-data" }))
+            {
+
                 <h3>Contact Info. Form</h3>
+                <div class="row uniform">
+                    <div class="12u 12u$(medium)">
+                        @Html.ValidationSummary("", new { @class = "text-danger" })
+                    </div>
+                </div>
+                
                 <div class="row uniform" id="primary">
                     <div class="6u 12u$(xsmall)">
-                        <input type="text" name="p1.FirstName" id="p1.FirstName" value="" placeholder="First Name" required />
+                        @Html.TextBoxFor(m => m.FirstName, new { id = "firstName", placeholder = "First Name", required = "required" })
                     </div>
                     <div class="6u 12u$(xsmall)">
-                        <input type="text" name="p1.LastName" id="p1.LastName" value="" placeholder="Last Name" required />
+                        @Html.TextBoxFor(m => m.LastName, new { id = "lastName", placeholder = "Last Name", required = "required" })
                     </div>
                     <div class="3u 12u$(small)">
-                        <input type="radio" id="p1.Sex_Male" name="p1.Sex">
-                        <label for="p1.Sex_Male">Chettiar</label>
+                        @Html.RadioButtonFor(m => m.Gender, "M", new { id = "genderMale", @checked = "true" })
+                        <label for="genderMale">Chettiar</label>
                     </div>
                     <div class="3u 12u$(small)">
-                        <input type="radio" id="p1.Sex_Female" name="p1.Sex">
-                        <label for="p1.Sex_Female">Aachi</label>
+                        @Html.RadioButtonFor(m => m.Gender, "F", new { id = "genderFemale" })
+                        <label for="genderFemale">Aachi</label>
                     </div>
                     <div class="6u 12u$(xsmall)">
-                        <input type="email" name="p1.Email" id="p1.Email" value="" placeholder="Email" required />
+                        @Html.TextBoxFor(m => m.Email, new { id = "email", placeholder = "Email", required = "required", type = "email" })
                     </div>
                     <div class="6u 12u$(xsmall)">
-                        <input type="text" name="p1.HomePhone" id="p1.HomePhone" value="" placeholder="Home Phone#" />
+                        @Html.TextBoxFor(m => m.HomePhone, new { id = "homePhone", placeholder = "Home Phone#", required = "required" })
                     </div>
                     <div class="6u 12u$(xsmall)">
-                        <input type="text" name="p1.MobilePhone" id="p1.MobilePhone" value="" placeholder="Mobile Phone#" />
+                        @Html.TextBoxFor(m => m.MobilePhone, new { id = "mobilePhone", placeholder = "Mobile Phone#" })
                     </div>
                     <div class="12u 12u$(xsmall)">
-                        <input type="email" name="p1.Address" id="p1.Address" value="" placeholder="Address" required />
+                        @Html.TextBoxFor(m => m.Address, new { id = "address", placeholder = "Address" })
                     </div>
                     <div class="6u 12u$(xsmall)">
-                        <input type="text" name="p1.City" id="p1.City" value="" placeholder="US-City" />
+                        @Html.TextBoxFor(m => m.City, new { id = "city", placeholder = "US-City", required = "required" })
                     </div>
-                    <div class="6u 12u$(xsmall)">
+                    <div class="3u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="p1.State" id="p1.State">
+                            <select name="State" id="state" required>
                                 <option value=""> US-State</option>
                                 <option value="NJ">New Jersey</option>
                                 <option value="NY">New York</option>
@@ -58,9 +67,12 @@
                             </select>
                         </div>
                     </div>
+                    <div class="3u 12u$(xsmall)">
+                        @Html.TextBoxFor(m => m.ZipCode, new { id = "zipCode", placeholder = "Zip" })
+                    </div>
                     <div class="6u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="p1.Kovil" id="p1.Kovil" onChange="LoadPirivu(this.value, 'p1.Pirivu')" required>
+                            <select name="Kovil" id="kovil" onChange="LoadPirivu(this.value, 'pirivu')" required>
                                 <option value=""> Select Kovil</option>
                                 <option value="Ilayatrangudi">Ilayatrangudi</option>
                                 <option value="Iluppakudi">Iluppakudi</option>
@@ -76,21 +88,21 @@
                     </div>
                     <div class="6u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="p1.Pirivu" id="p1.Pirivu">
+                            <select name="KovilPirivu" id="pirivu" required>
                                 <option value=""> Select Pirivu</option>
                             </select>
                         </div>
                     </div>
                     <div class="6u 12u$(xsmall)">
-                        <input type="text" name="p1.NativePlace" id="p1.NativePlace" value="" placeholder="Native Place" required />
+                        @Html.TextBoxFor(m => m.NativePlace, new { id = "nativePlace", placeholder = "Native Place", required = "required" })
                     </div>
                     <div class="3u 12u$(small)">
-                        <input type="radio" id="p1.MartialStatus_Single" name="p1.MartialStatus" value="single" onchange="ToogleSecForm(this.value)">
-                        <label for="p1.MartialStatus_Single">Single</label>
+                        @Html.RadioButtonFor(m => m.MaritalStatus, "S", new { id = "maritalStatusSingle", onchange = "ToogleSecForm(this.value)" })
+                        <label for="maritalStatusSingle">Single</label>
                     </div>
                     <div class="3u 12u$(small)">
-                        <input type="radio" id="p1.MartialStatus_Married" name="p1.MartialStatus" value="married" onchange="ToogleSecForm(this.value)">
-                        <label for="p1.MartialStatus_Married">Married</label>
+                        @Html.RadioButtonFor(m => m.MaritalStatus, "M", new { id = "maritalStatusMarried", onchange = "ToogleSecForm(this.value)" })
+                        <label for="maritalStatusMarried">Married</label>
                     </div>
                     <!-- Break -->
                 </div>
@@ -100,23 +112,23 @@
                         <h3>Spouse Information</h3>
                     </div>
                     <div class="6u 12u$(xsmall)">
-                        <input type="text" name="s1.FirstName" id="s1.FirstName" value="" placeholder="First Name" />
+                        @Html.TextBoxFor(m => m.SpouseFirstName, new { id = "spouseFirstName", placeholder = "First Name" })
                     </div>
                     <div class="6u 12u$(xsmall)">
-                        <input type="text" name="s1.LastName" id="s1.LastName" value="" placeholder="Last Name" />
+                        @Html.TextBoxFor(m => m.SpouseLastName, new { id = "spouseLastName", placeholder = "Last Name" })
                     </div>
                     <div class="6u 12u$(xsmall)">
-                        <input type="email" name="s1.Email" id="s1.Email" value="" placeholder="Email"  />
+                        @Html.TextBoxFor(m => m.SpouseEmail, new { id = "spouseEmail", placeholder = "Email", type = "email" })
                     </div>
                     <div class="6u 12u$(xsmall)">
-                        <input type="text" name="s1.MobilePhone" id="s1.MobilePhone" value="" placeholder="Mobile Phone#" />
+                        @Html.TextBoxFor(m => m.SpouseMobilePhone, new { id = "spouseMobilePhone", placeholder = "Mobile Phone#" })
                     </div>
                     <div class="12u 12u$(xsmall)">
                         <h5>Please provide your spouse's information at birth for the following</h5>
                     </div>
                     <div class="6u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="s1.Kovil" id="s1.Kovil" onChange="LoadPirivu(this.value, 's1.Pirivu')">
+                            <select name="SpouseKovil" id="spouseKovil" onChange="LoadPirivu(this.value, 'spouseKovilPirivu')">
                                 <option value=""> Select Kovil</option>
                                 <option value="Ilayatrangudi">Ilayatrangudi</option>
                                 <option value="Iluppakudi">Iluppakudi</option>
@@ -132,13 +144,13 @@
                     </div>
                     <div class="6u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="s1.Pirivu" id="s1.Pirivu">
+                            <select name="SpouseKovilPirivu" id="spouseKovilPirivu">
                                 <option value=""> Select Pirivu</option>
                             </select>
                         </div>
                     </div>
                     <div class="6u 12u$(xsmall)">
-                        <input type="text" name="s1.NativePlace" id="s1.NativePlace" value="" placeholder="Native Place" />
+                        @Html.TextBoxFor(m => m.SpouseNativePlace, new { id = "spouseNativePlace", placeholder = "Native Place" })
                     </div>
                     <div class="6u 12u$(xsmall)">
                     </div>
@@ -147,15 +159,31 @@
                         <h3>Kids Information. Please fill age as of 01/01/2017.</h3>
                     </div>
 
-                    <div class="6u 12u$(xsmall)">
-                        <input type="text" name="k1.FirstName" id="k1.FirstName" value="" placeholder="First Name" />
+                    <div class="7u 12u$(xsmall)">
+                        @Html.TextBoxFor(m => m.Kid1FirstName, new { id = "k1.FirstName", placeholder = "First Name" })
                     </div>
-                    <div class="3u 12u$(xsmall)">
-                        <input type="text" name="k1.Age" id="k1.Age" value="" placeholder="Age" />
+                    <div class="2u 12u$(xsmall)">
+                        @Html.TextBoxFor(m => m.Kid1Age, new { id = "k1.Age", placeholder = "Age", min = "0", max = "25" })
                     </div>
                     <div class="3u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="k1.Sex" id="k1.Sex">
+                            <select name="Kid1Gender" id="k1.Gender">
+                                <option value=""> Gender</option>
+                                <option value="F">Female</option>
+                                <option value="M">Male</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Break -->
+                    <div class="7u 12u$(xsmall)">
+                        @Html.TextBoxFor(m => m.Kid2FirstName, new { id = "k2.FirstName", placeholder = "First Name" })
+                    </div>
+                    <div class="2u 12u$(xsmall)">
+                        @Html.TextBoxFor(m => m.Kid2Age, new { id = "k2.Age", placeholder = "Age", min = "0", max = "25" })
+                    </div>
+                    <div class="3u 12u$(xsmall)">
+                        <div class="select-wrapper">
+                            <select name="Kid2Gender" id="k2.Gender">
                                 <option value=""> Choose</option>
                                 <option value="F">Female</option>
                                 <option value="M">Male</option>
@@ -163,31 +191,15 @@
                         </div>
                     </div>
                     <!-- Break -->
-                    <div class="6u 12u$(xsmall)">
-                        <input type="text" name="k2.FirstName" id="k2.FirstName" value="" placeholder="First Name" />
+                    <div class="7u 12u$(xsmall)">
+                        @Html.TextBoxFor(m => m.Kid3FirstName, new { id = "k3.FirstName", placeholder = "First Name" })
                     </div>
-                    <div class="3u 12u$(xsmall)">
-                        <input type="text" name="k2.Age" id="k2.Age" value="" placeholder="Age" />
-                    </div>
-                    <div class="3u 12u$(xsmall)">
-                        <div class="select-wrapper">
-                            <select name="k2.Sex" id="k2.Sex">
-                                <option value=""> Choose</option>
-                                <option value="F">Female</option>
-                                <option value="M">Male</option>
-                            </select>
-                        </div>
-                    </div>
-                    <!-- Break -->
-                    <div class="6u 12u$(xsmall)">
-                        <input type="text" name="k3.FirstName" id="k3.FirstName" value="" placeholder="First Name" />
-                    </div>
-                    <div class="3u 12u$(xsmall)">
-                        <input type="text" name="k3.Age" id="k3.Age" value="" placeholder="Age" />
+                    <div class="2u 12u$(xsmall)">
+                        @Html.TextBoxFor(m => m.Kid3Age, new { id = "k3.Age", placeholder = "Age", min = "0", max = "25" })
                     </div>
                     <div class="3u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="k3.Sex" id="k3.Sex">
+                            <select name="Kid3Gender" id="k3.Gender">
                                 <option value=""> Choose</option>
                                 <option value="F">Female</option>
                                 <option value="M">Male</option>
@@ -208,31 +220,31 @@
                 </div>
 
                 <div class="row uniform" id="kids+" name="kids+" style="display:none;">
-                    <div class="6u 12u$(xsmall)">
-                        <input type="text" name="k4.FirstName" id="k4.FirstName" value="" placeholder="First Name" />
+                    <div class="7u 12u$(xsmall)">
+                        @Html.TextBoxFor(m => m.Kid4FirstName, new { id = "k4.FirstName", placeholder = "First Name" })
                     </div>
-                    <div class="3u 12u$(xsmall)">
-                        <input type="text" name="k4.Age" id="k4.Age" value="" placeholder="Age" />
+                    <div class="2u 12u$(xsmall)">
+                        @Html.TextBoxFor(m => m.Kid4Age, new { id = "k4.Age", placeholder = "Age", min = "0", max = "25" })
                     </div>
                     <div class="3u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="k4.Sex" id="k4.Sex">
-                                <option value=""> Choose</option>
+                            <select name="Kid4Gender" id="k4.Gender">
+                                <option value=""> Gender</option>
                                 <option value="F">Female</option>
                                 <option value="M">Male</option>
                             </select>
                         </div>
                     </div>
                     <!-- Break -->
-                    <div class="6u 12u$(xsmall)">
-                        <input type="text" name="k5.FirstName" id="k5.FirstName" value="" placeholder="First Name" />
+                    <div class="7u 12u$(xsmall)">
+                        @Html.TextBoxFor(m => m.Kid5FirstName, new { id = "k5.FirstName", placeholder = "First Name" })
                     </div>
-                    <div class="3u 12u$(xsmall)">
-                        <input type="text" name="k5.Age" id="k5.Age" value="" placeholder="Age" />
+                    <div class="2u 12u$(xsmall)">
+                        @Html.TextBoxFor(m => m.Kid5Age, new { id = "k5.Age", placeholder = "Age", min = "0", max = "25" })
                     </div>
                     <div class="3u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="k5.Sex" id="k5.Sex">
+                            <select name="Kid5Gender" id="k5.Gender">
                                 <option value=""> Choose</option>
                                 <option value="F">Female</option>
                                 <option value="M">Male</option>
@@ -247,10 +259,10 @@
                         <h3>Family Picture:</h3>
                     </div>
                     <div class="6u 12u$(medium)">
-                        <input type="file" name="f1.Image" id="f1.Image" value="" placeholder="Upload Pic" />
+                        @Html.TextBoxFor(m => m.FamilyPic, new { type = "file", id = "f1.Image" })
                     </div>
                     <div class="6u 12u$(medium)">
-                        <img id="f1.ImagePreview" />
+                        <img id="f1.ImagePreview" style="max-height:300px;max-width:300px; " />
                     </div>
                 </div>
                 <!-- Break -->
@@ -262,7 +274,7 @@
                         </ul>
                     </div>
                 </div>
-            </form>
+            }
         </div>
     </div>
 </section>
@@ -272,6 +284,9 @@
     <script src="~/assets/js/util.js"></script>
     <script src="~/assets/js/main.js"></script>
     <script>
+        var p1State = '@Html.ValueFor(m => m.State)';
+    </script>
+    <script>
         var data = {
             "kovils": {
                 "Ilayatrangudi": ["Kazhani Vaasarkkudaiyar","Kinginikkoorudaiyar","Okkurudaiyar","Pattanasamiyar","Perusenthurudaiyar","Sirusenthurudaiyar","Perumaruthurudaiyar"],
@@ -280,6 +295,11 @@
             }
         }
 
+        $(document).ready(function () {
+            //ToDo: Fix Loose of selected Value
+        });
+
+        //Image Preview
         document.getElementById("f1.Image").onchange = function () {
             var reader = new FileReader();
 
@@ -292,6 +312,7 @@
             reader.readAsDataURL(this.files[0]);
         };
 
+        //Load Kovil Pirivu based on Kovil
         function LoadPirivu(kovilname, target)
         {
             var pirivus = data.kovils[kovilname];
@@ -304,7 +325,7 @@
             }
             else
             {
-                var selectHtml = "<option value=''> No Pirivu</option>";
+                var selectHtml = "<option value='NoPirivu'> No Pirivu</option>";
             }
             document.getElementById(target).innerHTML = selectHtml;
         }
@@ -312,7 +333,7 @@
         function ToogleSecForm(mstatus)
         {
             var secForm = document.getElementById('spouse');
-            if (mstatus != 'single')
+            if (mstatus != 'S')
             {
                 secForm.style.display = "block";
                 SpouseFormValidation(true);
@@ -336,7 +357,7 @@
         }
         function SpouseFormValidation(status)
         {
-            var fields = ["s1.FirstName", "s1.LastName", "s1.Kovil", "s1.NativePlace"];
+            var fields = ["spouseFirstName", "spouseLastName", "spouseKovil","spouseKovilPirivu", "spouseNativePlace"];
             for (var index in fields)
             {
                 var field = fields[index];
