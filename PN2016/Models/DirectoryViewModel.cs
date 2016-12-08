@@ -144,7 +144,7 @@ namespace PN2016.Models
 
 
         [Display(Name = "Family Picture", GroupName = "Family", Order = 36)]
-        public HttpPostedFile FamilyPic { get; set; }
+        public HttpPostedFileBase FamilyPic { get; set; }
 
     }
 }

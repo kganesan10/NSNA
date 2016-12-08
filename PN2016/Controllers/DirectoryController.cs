@@ -1,4 +1,6 @@
-﻿using Dropbox.Api;
+﻿using Microsoft.Azure;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 using PN2016.DBModels;
 using PN2016.Models;
 using System;
@@ -6,6 +8,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -26,20 +29,25 @@ namespace PN2016.Controllers
             return View();
         }
 
-        // http://stackoverflow.com/questions/725627/accessing-google-spreadsheets-with-c-sharp-using-google-data-api
-        // https://www.dropbox.com/developers/documentation/dotnet#tutorial
-
         [HttpPost]
         public ActionResult Create(ContactInfoViewModel model)
         {
             ValidateModel(model);
+            var hpf = model.FamilyPic;
+            if (hpf != null && hpf.ContentLength != 0)
+            {
+                var fileExtension = Path.GetExtension(hpf.FileName).ToLower();
+                if (fileExtension != ".jpg" || fileExtension != ".png" || fileExtension != ".gif" || fileExtension != ".jpeg")
+                {
+                    ModelState.AddModelError("Family Picture", "Only Images are allowed for Family Picture.");
+                }
+            }
 
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            //var hpf = new 
             //Process Data to Create Data Model
             FamilyContactModel familyContact = ProcessDBModel(model);
 
@@ -47,13 +55,18 @@ namespace PN2016.Controllers
             ContactInfoDB contactInfoDB = new ContactInfoDB();
             contactInfoDB.InsertFamilyInfo(familyContact);
 
+            //Upload Pic to Azure.
+            if (hpf != null && hpf.ContentLength != 0)
+            {
+                var FileExtension = Path.GetExtension(hpf.FileName);
+                var mediaFileName = familyContact.FamilyContactGuid + FileExtension;
+                new AzureFileStorage().UploadFile(mediaFileName, hpf.InputStream);
+            }
+            
             //Send Email.
             GMailDispatcher mailDispatcher = new GMailDispatcher();
-            mailDispatcher.SendPN2016Message(familyContact.Email, familyContact.FirstName);
-
-            //Upload Pic to Dropbox.
+            mailDispatcher.SendPN2016Message(familyContact.Email, familyContact.FirstName+ " "+ familyContact.LastName);
             
-
             return View("CreateConfirm");
         }
 
@@ -187,15 +200,15 @@ namespace PN2016.Controllers
 
         public GMailDispatcher()
         {
-            FromAddress = new MailAddress("nsna.northeast@gmail.com", "NSNA - NorthEast");
+            FromAddress = new MailAddress("nsna.northeast@gmail.com", "NSNA NorthEast");
             GMailClient = new SmtpClient
             {
                 Host = "smtp.gmail.com",
                 Port = 587,
                 EnableSsl = true,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(FromAddress.Address, "nsnane2016")
+                UseDefaultCredentials = true,
+                Credentials = new NetworkCredential("nsna.northeast@gmail.com", "rGK8vbqT2gTC")
             };
         }
 
@@ -317,22 +330,23 @@ namespace PN2016.Controllers
 
     }
 
-    public class DropBoxStorage
+    public class AzureFileStorage
     {
-        const string token = "c8dn0cmmmdz1gyf";
-        public DropBoxStorage()
+        private CloudStorageAccount storageAccount; 
+        public AzureFileStorage()
         {
-
+            storageAccount = CloudStorageAccount.Parse(
+                 CloudConfigurationManager.GetSetting("AzureStorage"));
         }
 
-        public async Task<string> CheckAccount()
+        public bool UploadFile(string fileName, Stream mediaStream)
         {
-            using (var dbx = new DropboxClient(token))
-            {
-                var full = await dbx.Users.GetCurrentAccountAsync();
-                var a =  string.Format("{0} - {1}", full.Name.DisplayName, full.Email);
-                return a;
-            }
+            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+            CloudBlobContainer container = blobClient.GetContainerReference("profilepic");
+            if (!container.Exists()) return false;
+            CloudBlockBlob imageBlob = container.GetBlockBlobReference(fileName);
+            imageBlob.UploadFromStream(mediaStream);
+            return true;
         }
     }
 }
