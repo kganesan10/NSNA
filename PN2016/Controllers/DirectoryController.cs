@@ -33,7 +33,9 @@ namespace PN2016.Controllers
         public ActionResult Create(ContactInfoViewModel model)
         {
             ValidateModel(model);
+            
             var hpf = model.FamilyPic;
+            /*
             if (hpf != null && hpf.ContentLength != 0)
             {
                 var fileExtension = Path.GetExtension(hpf.FileName).ToLower();
@@ -42,7 +44,7 @@ namespace PN2016.Controllers
                     ModelState.AddModelError("Family Picture", "Only Images are allowed for Family Picture.");
                 }
             }
-
+            */
             if (!ModelState.IsValid)
             {
                 return View(model);
