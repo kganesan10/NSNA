@@ -19,6 +19,8 @@ namespace PN2016.Controllers
 {
     public class DirectoryController : Controller
     {
+
+        string[] allowedExtension = new string[] { ".jpg", ".png", ".gif", ".jpeg" };
         public ActionResult Index()
         {
             return RedirectToAction("Create");
@@ -34,17 +36,6 @@ namespace PN2016.Controllers
         {
             ValidateModel(model);
             
-            var hpf = model.FamilyPic;
-            /*
-            if (hpf != null && hpf.ContentLength != 0)
-            {
-                var fileExtension = Path.GetExtension(hpf.FileName).ToLower();
-                if (fileExtension != ".jpg" || fileExtension != ".png" || fileExtension != ".gif" || fileExtension != ".jpeg")
-                {
-                    ModelState.AddModelError("Family Picture", "Only Images are allowed for Family Picture.");
-                }
-            }
-            */
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -58,11 +49,12 @@ namespace PN2016.Controllers
             contactInfoDB.InsertFamilyInfo(familyContact);
 
             //Upload Pic to Azure.
-            if (hpf != null && hpf.ContentLength != 0)
+            var familyPic = model.FamilyPic;
+            if (familyPic != null && familyPic.ContentLength != 0)
             {
-                var FileExtension = Path.GetExtension(hpf.FileName);
+                var FileExtension = Path.GetExtension(familyPic.FileName);
                 var mediaFileName = familyContact.FamilyContactGuid + FileExtension;
-                new AzureFileStorage().UploadFile(mediaFileName, hpf.InputStream);
+                new AzureFileStorage().UploadFile(mediaFileName, familyPic.InputStream);
             }
             
             //Send Email.
@@ -87,6 +79,18 @@ namespace PN2016.Controllers
                 if (string.IsNullOrWhiteSpace(model.SpouseKovilPirivu))
                     ModelState.AddModelError("Spouse Kovil Pirivu", "Spouse's Kovil Pirivu at Birth is required");
             }
+
+            var familyPic = model.FamilyPic;
+            if (familyPic != null && familyPic.ContentLength != 0)
+            {
+                var fileExtension = Path.GetExtension(familyPic.FileName).ToLower();
+                var index = Array.IndexOf(allowedExtension, fileExtension);
+                if (index < 0)
+                {
+                    ModelState.AddModelError("Family Picture", "Only Images are allowed for Family Picture.");
+                }
+            }
+
         }
 
         private static FamilyContactModel ProcessDBModel(ContactInfoViewModel model)
