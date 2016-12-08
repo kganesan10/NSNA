@@ -8,11 +8,7 @@
     <p>
         As part of 2016 PN function we planned to collect contact information of Nagarathars in our region. <br />
         Please fill out the below form and submit the information for this year directory. The directory will be available on request.
-        <h2>This form is currently not active</h2>
     </p>
-    <div class="row">
-
-    </div>
 </section>
 <section>
     <div class="row">
@@ -34,11 +30,11 @@
                     <div class="6u 12u$(xsmall)">
                         @Html.TextBoxFor(m => m.LastName, new { id = "lastName", placeholder = "Last Name", required = "required" })
                     </div>
-                    <div class="3u 12u$(small)">
+                    <div class="6u 12u$(xsmall)">
                         @Html.RadioButtonFor(m => m.Gender, "M", new { id = "genderMale", @checked = "true" })
                         <label for="genderMale">Chettiar</label>
-                    </div>
-                    <div class="3u 12u$(small)">
+                        @Html.Raw("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
+                        @Html.Raw("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
                         @Html.RadioButtonFor(m => m.Gender, "F", new { id = "genderFemale" })
                         <label for="genderFemale">Aachi</label>
                     </div>
@@ -57,14 +53,16 @@
                     <div class="6u 12u$(xsmall)">
                         @Html.TextBoxFor(m => m.City, new { id = "city", placeholder = "US-City", required = "required" })
                     </div>
+                    @{
+                        var state_0 = new SelectListItem() { Value = "", Text = "US-State" };
+                        var state_nj = new SelectListItem() { Value = "NJ", Text = "New Jersey" };
+                        var state_ny = new SelectListItem() { Value = "NY", Text = "New York" };
+                        var state_ct = new SelectListItem() { Value = "CT", Text = "Connecticut" };
+                        var states = new[] { state_0, state_nj, state_ny, state_ct };
+                    }
                     <div class="3u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="State" id="state" required>
-                                <option value=""> US-State</option>
-                                <option value="NJ">New Jersey</option>
-                                <option value="NY">New York</option>
-                                <option value="CT">Connecticut</option>
-                            </select>
+                            @Html.DropDownListFor(m => m.State, states, new { id = "state", required = "required" })
                         </div>
                     </div>
                     <div class="3u 12u$(xsmall)">
@@ -72,7 +70,7 @@
                     </div>
                     <div class="6u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="Kovil" id="kovil" onChange="LoadPirivu(this.value, 'pirivu')" required>
+                            <select name="Kovil" id="kovil" onChange="LoadPirivu(this.value, 'kovilPirivu')" required>
                                 <option value=""> Select Kovil</option>
                                 <option value="Ilayatrangudi">Ilayatrangudi</option>
                                 <option value="Iluppakudi">Iluppakudi</option>
@@ -88,7 +86,7 @@
                     </div>
                     <div class="6u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="KovilPirivu" id="pirivu" required>
+                            <select name="KovilPirivu" id="kovilPirivu" required>
                                 <option value=""> Select Pirivu</option>
                             </select>
                         </div>
@@ -96,11 +94,11 @@
                     <div class="6u 12u$(xsmall)">
                         @Html.TextBoxFor(m => m.NativePlace, new { id = "nativePlace", placeholder = "Native Place", required = "required" })
                     </div>
-                    <div class="3u 12u$(small)">
+                    <div class="6u 12u$(xsmall)">
                         @Html.RadioButtonFor(m => m.MaritalStatus, "S", new { id = "maritalStatusSingle", onchange = "ToogleSecForm(this.value)" })
                         <label for="maritalStatusSingle">Single</label>
-                    </div>
-                    <div class="3u 12u$(small)">
+                        @Html.Raw("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
+                        @Html.Raw("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
                         @Html.RadioButtonFor(m => m.MaritalStatus, "M", new { id = "maritalStatusMarried", onchange = "ToogleSecForm(this.value)" })
                         <label for="maritalStatusMarried">Married</label>
                     </div>
@@ -159,6 +157,12 @@
                         <h3>Kids Information. Please fill age as of 01/01/2017.</h3>
                     </div>
 
+                    @{ 
+                        var gender_o = new SelectListItem() { Value = "", Text = "Gender" };
+                        var gender_f = new SelectListItem() { Value = "F", Text = "Female" };
+                        var gender_m = new SelectListItem() { Value = "M", Text = "Male" };
+                        var items = new[] { gender_o, gender_f, gender_m };
+                    }
                     <div class="7u 12u$(xsmall)">
                         @Html.TextBoxFor(m => m.Kid1FirstName, new { id = "k1.FirstName", placeholder = "First Name" })
                     </div>
@@ -167,11 +171,7 @@
                     </div>
                     <div class="3u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="Kid1Gender" id="k1.Gender">
-                                <option value=""> Gender</option>
-                                <option value="F">Female</option>
-                                <option value="M">Male</option>
-                            </select>
+                            @Html.DropDownListFor(m => m.Kid1Gender, items , new { id = "k1.Gender" })
                         </div>
                     </div>
                     <!-- Break -->
@@ -183,11 +183,7 @@
                     </div>
                     <div class="3u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="Kid2Gender" id="k2.Gender">
-                                <option value=""> Choose</option>
-                                <option value="F">Female</option>
-                                <option value="M">Male</option>
-                            </select>
+                            @Html.DropDownListFor(m => m.Kid2Gender, items, new { id = "k2.Gender" })
                         </div>
                     </div>
                     <!-- Break -->
@@ -199,11 +195,7 @@
                     </div>
                     <div class="3u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="Kid3Gender" id="k3.Gender">
-                                <option value=""> Choose</option>
-                                <option value="F">Female</option>
-                                <option value="M">Male</option>
-                            </select>
+                            @Html.DropDownListFor(m => m.Kid3Gender, items, new { id = "k3.Gender" })
                         </div>
                     </div>
 
@@ -228,11 +220,7 @@
                     </div>
                     <div class="3u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="Kid4Gender" id="k4.Gender">
-                                <option value=""> Gender</option>
-                                <option value="F">Female</option>
-                                <option value="M">Male</option>
-                            </select>
+                            @Html.DropDownListFor(m => m.Kid4Gender, items, new { id = "k4.Gender" })
                         </div>
                     </div>
                     <!-- Break -->
@@ -244,11 +232,7 @@
                     </div>
                     <div class="3u 12u$(xsmall)">
                         <div class="select-wrapper">
-                            <select name="Kid5Gender" id="k5.Gender">
-                                <option value=""> Choose</option>
-                                <option value="F">Female</option>
-                                <option value="M">Male</option>
-                            </select>
+                            @Html.DropDownListFor(m => m.Kid5Gender, items, new { id = "k5.Gender" })
                         </div>
                     </div>
                 </div>
@@ -284,7 +268,11 @@
     <script src="~/assets/js/util.js"></script>
     <script src="~/assets/js/main.js"></script>
     <script>
-        var p1State = '@Html.ValueFor(m => m.State)';
+        var kovil = '@Html.ValueFor(m => m.Kovil)';
+        var kovilPirivu = '@Html.ValueFor(m => m.KovilPirivu)';
+        var maritalStatus = '@Html.ValueFor(m=>m.MaritalStatus)';
+        var skovil = '@Html.ValueFor(m => m.SpouseKovil)';
+        var skovilPirivu = '@Html.ValueFor(m => m.SpouseKovilPirivu)';
     </script>
     <script>
         var data = {
@@ -295,9 +283,25 @@
             }
         }
 
-        $(document).ready(function () {
-            //ToDo: Fix Loss of selected Value
-        });
+        $(document).ready(
+            function () {
+                if (kovil != '')
+                {
+                    $("#kovil").val(kovil);
+                    LoadPirivu(kovil, 'kovilPirivu');
+                    $("#kovilPirivu").val(kovilPirivu);
+                }
+                if(maritalStatus != '')
+                {
+                    ToogleSecForm(maritalStatus);
+                    if (skovil != '') {
+                        $("#spouseKovil").val(skovil);
+                        LoadPirivu(skovil, 'spouseKovilPirivu');
+                        $("#spouseKovilPirivu").val(skovilPirivu);
+                    }
+                }
+            }
+        );
 
         //Image Preview
         document.getElementById("f1.Image").onchange = function () {
