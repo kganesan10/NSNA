@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="~/Content/nsna.css" />
     <!--[if lte IE 9]><link rel="stylesheet" href="~/assets/css/ie9.css" /><![endif]-->
     <!--[if lte IE 8]><link rel="stylesheet" href="~/assets/css/ie8.css" /><![endif]-->
+    @RenderSection("StyleSheets", false);
     <meta name="description" content="North America Nagarathar Sangam NSNA - North East 2016 Pillayar Nonbu">
     <meta name="keywords" content="NSNA, NSNA-NE, Pillayar Nonbu, NJ Nagarathar, NY Nagarathar, CT Nagarathar, USA Nagarathars, Chettiars">
     <meta name="author" content="Karuppiah Ganesan, KG TECHNOLOGY SOLUTIONS INC">
@@ -87,7 +88,12 @@
     <!-- Scripts -->
     <script src="~/assets/js/jquery.min.js"></script>
     <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+    <script src="~/assets/js/skel.min.js"></script>
+    <script src="~/assets/js/util.js"></script>
+    <script src="~/assets/js/main.js"></script>
+
     @RenderSection("JavaScript", false);
+
     
     <!-- GA -->
     <script>

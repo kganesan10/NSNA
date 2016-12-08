@@ -3,6 +3,10 @@
     ViewBag.Title = "2016 Directory";
 }
 
+@section StyleSheets{
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+}
+
 <section>
     <h2 id="content"><a name="directory"></a>2016 Directory (NY/NJ/CT)</h2>
     <p>
@@ -264,9 +268,8 @@
 </section>
 
 @section JavaScript{
-    <script src="~/assets/js/skel.min.js"></script>
-    <script src="~/assets/js/util.js"></script>
-    <script src="~/assets/js/main.js"></script>
+    <script src="~/assets/js/nativeplaces.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
         var kovil = '@Html.ValueFor(m => m.Kovil)';
         var kovilPirivu = '@Html.ValueFor(m => m.KovilPirivu)';
@@ -285,6 +288,15 @@
 
         $(document).ready(
             function () {
+                
+                $("#nativePlace").autocomplete({
+                    source: nativePlaceList
+                });
+
+                $("#spouseNativePlace").autocomplete({
+                    source: nativePlaceList
+                });
+
                 if (kovil != '')
                 {
                     $("#kovil").val(kovil);
