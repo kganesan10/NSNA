@@ -207,6 +207,7 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\DirectoryController.cs" />
+    <Compile Include="Controllers\DressExchangeController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="DBModels\FamilyInfoModel.cs" />
     <Compile Include="Global.asax.cs">
@@ -244,6 +245,21 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="images\01_turmeric.jpg" />
+    <Content Include="images\02_salt.jpg" />
+    <Content Include="images\05_lemon.jpg" />
+    <Content Include="images\06_dates.jpg" />
+    <Content Include="images\07_kalkandu.jpg" />
+    <Content Include="images\08_coconuts.jpg" />
+    <Content Include="images\09_silverLamp.jpg" />
+    <Content Include="images\10_silverPillayar.jpg" />
+    <Content Include="images\11_kcsp.jpg" />
+    <Content Include="images\12_girlDress.jpg" />
+    <Content Include="images\13_boyDress.jpg" />
+    <Content Include="images\14_pillayarPic.jpg" />
+    <Content Include="images\15_bagPen.jpg" />
+    <Content Include="images\16_canvasArt.jpg" />
+    <Content Include="images\17_others.jpg" />
     <Content Include="images\dn.pillayar03.jpg" />
     <Content Include="images\food.jpg" />
     <Content Include="images\logo.png" />
@@ -259,9 +275,6 @@
     <Content Include="images\pic10.jpg" />
     <Content Include="images\pic11.jpg" />
     <Content Include="images\Shyam_ML.png" />
-    <Content Include="images\sponsor1.jpg" />
-    <Content Include="images\sponsor2.jpg" />
-    <Content Include="images\sponsor3.jpg" />
     <Content Include="LICENSE.txt" />
     <Content Include="README.txt" />
     <Content Include="Scripts\bootstrap.js" />
@@ -323,6 +336,7 @@
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Directory\Create.cshtml" />
     <Content Include="Views\Directory\CreateConfirm.cshtml" />
+    <Content Include="Views\DressExchange\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

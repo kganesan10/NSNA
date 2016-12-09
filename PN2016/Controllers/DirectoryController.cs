@@ -64,6 +64,32 @@ namespace PN2016.Controllers
             return View("CreateConfirm");
         }
 
+        public ActionResult List()
+        {
+            throw new NotImplementedException("List All - Coming Soon");
+            //return View();
+        }
+
+        public ActionResult Detail(string id)
+        {
+            throw new NotImplementedException("View Detail - " + id + " - Coming Soon");
+            //return View();
+        }
+
+        public ActionResult Update(string guid)
+        {
+            throw new NotImplementedException("Update - Coming Soon");
+            //return View();
+        }
+
+        [HttpPost]
+        public ActionResult Update(ContactInfoViewModel model)
+        {
+            return View();
+        }
+
+
+
         private void ValidateModel(ContactInfoViewModel model)
         {
             var mStatus = model.MaritalStatus ?? string.Empty;
