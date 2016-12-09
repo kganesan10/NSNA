@@ -1,0 +1,135 @@
+﻿@model PN2016.Models.ContactInfoViewModel
+@{
+    ViewBag.Title = "Contact Details";
+}
+
+<h2>Contact Details</h2>
+<section>
+    <div class="row">
+        <div class="11u$ 12u$(medium)">
+            <h3>Family Info:</h3>
+            <div class="row uniform" id="primary">
+                <div class="6u 12u$(xsmall)">
+                    <b>First Name</b> : @Html.DisplayFor(model => model.FirstName)
+                </div>
+                <div class="6u 12u$(xsmall)">
+                    <b>Last Name</b> : @Html.DisplayFor(model => model.LastName)
+                </div>
+                <div class="6u 12u$(xsmall)">
+                    @{ 
+                        var gender = (Model.Gender == "M") ? "Chettiar" : "Achi";
+                    }
+                    <b>Gender</b> : @gender
+                </div>
+                <div class="6u 12u$(xsmall)">
+                    <b>Email</b> :@Html.DisplayFor(model => model.Email)
+                </div>
+                <div class="6u 12u$(xsmall)">
+                    <b>Home Phone</b> : @Html.DisplayFor(model => model.HomePhone)
+                </div>
+                <div class="6u 12u$(xsmall)">
+                    <b>Mobile Phone</b> : @Html.DisplayFor(model => model.MobilePhone)
+                </div>
+                <div class="12u 12u$(xsmall)">
+                    <b>Address</b> : @Html.DisplayFor(model => model.Address)
+                </div>
+                <div class="6u 12u$(xsmall)">
+                    <b>City</b> : @Html.DisplayFor(model => model.City)
+                </div>
+                @{
+                    var stateList = new Dictionary<string, string>();
+                    stateList.Add("NJ", "New Jersey");
+                    stateList.Add("NY", "New York");
+                    stateList.Add("CT", "Connecticut");
+                    string state = "";
+                    stateList.TryGetValue(Model.State, out state);
+                }
+                <div class="3u 12u$(xsmall)">
+                    <b>State</b> : @state
+                </div>
+                <div class="3u 12u$(xsmall)">
+                    <b>Zip</b> : @Html.DisplayFor(model => model.ZipCode)
+                </div>
+                <div class="6u 12u$(xsmall)">
+                    <b>Kovil</b> : @Html.DisplayFor(model => model.Kovil)
+                </div>
+                <div class="6u 12u$(xsmall)">
+                    <b>Kovil Pirivu</b> : @Html.DisplayFor(model => model.KovilPirivu)
+                </div>
+                <div class="6u 12u$(xsmall)">
+                    <b>Native Place</b> : @Html.DisplayFor(model => model.NativePlace)
+                </div>
+                <div class="6u 12u$(xsmall)">
+                    @{ 
+                        var mstatus = Model.MaritalStatus == "S" ? "Single" : "Married";
+                    }
+                    <b>Marital Status</b> : @mstatus
+                </div>
+            </div>
+
+            @if(Model.MaritalStatus == "M")
+            {
+                <div class="row uniform">
+                    <div class="12u 12u$(xsmall)">
+                        <h3>Spouse Information</h3>
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <b>First Name</b> : @Html.DisplayFor(model => model.SpouseFirstName)
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <b>Last Name</b> : @Html.DisplayFor(model => model.SpouseLastName)
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <b>Email</b> : @Html.DisplayFor(model => model.SpouseEmail)
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <b>Mobile Phone</b> : @Html.DisplayFor(model => model.SpouseMobilePhone)
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <b>Kovil</b> : @Html.DisplayFor(model => model.SpouseKovil)
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <b>Kovil Pirivu</b> : @Html.DisplayFor(model => model.SpouseKovilPirivu)
+                    </div>
+                    <div class="6u 12u$(xsmall)">
+                        <b>Native Place</b> : @Html.DisplayFor(model => model.SpouseNativePlace)
+                    </div>
+                </div>
+            }
+
+            @if (Model.Kids.Count > 0)
+            {
+                <div class="row uniform">
+                    <div class="12u 12u$(xsmall)">
+                        <h3>Kids Information</h3>
+                    </div>
+                    @{
+                        for (int i = 0; i < Model.Kids.Count; i++)
+                        {
+                            <div class="7u 12u$(xsmall)">
+                                <b>Name</b> : @Html.DisplayFor(model => model.Kids[i].FirstName)
+                            </div>
+                            <div class="2u 12u$(xsmall)">
+                                <b>Age</b> : @Html.DisplayFor(model => model.Kids[i].Age)
+                            </div>
+                            <div class="3u 12u$(xsmall)">
+                                @{
+                                    var kgender = (Model.Kids[i].Gender == "M") ? "Male" : "Female";
+                                }
+                                <b>Gender</b> : @kgender
+                            </div>
+                        }
+                    }
+                </div>
+            }
+            <br/>
+            <img src="@Html.DisplayFor(model => model.FamilyPicFilePath)" alt="family Pic"/>
+         </div>
+    </div>
+</section>
+<!--
+    <p>
+        @Html.ActionLink("Edit", "Edit", new {  id = Model.FamilyContactGuid })
+    </p>
+-->    
+

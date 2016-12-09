@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace PN2016.DBModels
 {
-    public class FamilyContactModel
+    public class FamilyInfoDBModel
     {
         public string FamilyContactGuid { get; set; }
 
@@ -31,16 +29,18 @@ namespace PN2016.DBModels
         public string KovilPirivu { get; set; }
         public string NativePlace { get; set; }
 
-        public SpouseInfoModel Spouse { get; set; }
+        public SpouseInfoDBModel Spouse { get; set; }
 
-        public List<KidsInfoModel> Kids { get; set; }
+        public List<KidsInfoDBModel> Kids { get; set; }
+
+        public string FamilyPicFileName { get; set; }
 
         public DateTime CreatedOn { get; set; }
         public DateTime LastModifiedOn { get; set; }
 
     }
 
-    public class SpouseInfoModel
+    public class SpouseInfoDBModel
     {
 
         //Personal Info
@@ -58,7 +58,7 @@ namespace PN2016.DBModels
 
     }
 
-    public class KidsInfoModel
+    public class KidsInfoDBModel
     {
         public string FamilyContactGuid { get; set; }
         public string KidsInfoGuid { get; set; }

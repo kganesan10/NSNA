@@ -26,7 +26,7 @@
                         @Html.ValidationSummary("", new { @class = "text-danger" })
                     </div>
                 </div>
-                
+
                 <div class="row uniform" id="primary">
                     <div class="6u 12u$(xsmall)">
                         @Html.TextBoxFor(m => m.FirstName, new { id = "firstName", placeholder = "First Name", required = "required" })
@@ -80,10 +80,10 @@
                                 <option value="Iluppakudi">Iluppakudi</option>
                                 <option value="Iraniyur">Iraniyur</option>
                                 <option value="Mathur">Mathur</option>
-                                <option value="Nemam_Kovil">Nemam Kovil</option>
+                                <option value="Nemam Kovil">Nemam Kovil</option>
                                 <option value="Pillaiyarpatti">Pillaiyarpatti</option>
                                 <option value="Soorakudi">Soorakudi</option>
-                                <option value="Vairavan_Kovil">Vairavan Koil</option>
+                                <option value="Vairavan Kovil">Vairavan Koil</option>
                                 <option value="Velangudi">Velangudi</option>
                             </select>
                         </div>
@@ -99,11 +99,11 @@
                         @Html.TextBoxFor(m => m.NativePlace, new { id = "nativePlace", placeholder = "Native Place", required = "required" })
                     </div>
                     <div class="6u 12u$(xsmall)">
-                        @Html.RadioButtonFor(m => m.MaritalStatus, "S", new { id = "maritalStatusSingle", onchange = "ToogleSecForm(this.value)" })
+                        @Html.RadioButtonFor(m => m.MaritalStatus, "S", new { id = "maritalStatusSingle", onchange = "ToogleSpouseForm(this.value)" })
                         <label for="maritalStatusSingle">Single</label>
                         @Html.Raw("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
                         @Html.Raw("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
-                        @Html.RadioButtonFor(m => m.MaritalStatus, "M", new { id = "maritalStatusMarried", onchange = "ToogleSecForm(this.value)" })
+                        @Html.RadioButtonFor(m => m.MaritalStatus, "M", new { id = "maritalStatusMarried", onchange = "ToogleSpouseForm(this.value)" })
                         <label for="maritalStatusMarried">Married</label>
                     </div>
                     <!-- Break -->
@@ -136,10 +136,10 @@
                                 <option value="Iluppakudi">Iluppakudi</option>
                                 <option value="Iraniyur">Iraniyur</option>
                                 <option value="Mathur">Mathur</option>
-                                <option value="Nemam_Kovil">Nemam Kovil</option>
+                                <option value="Nemam Kovil">Nemam Kovil</option>
                                 <option value="Pillaiyarpatti">Pillaiyarpatti</option>
                                 <option value="Soorakudi">Soorakudi</option>
-                                <option value="Vairavan_Kovil">Vairavan Koil</option>
+                                <option value="Vairavan Kovil">Vairavan Koil</option>
                                 <option value="Velangudi">Velangudi</option>
                             </select>
                         </div>
@@ -167,42 +167,23 @@
                         var gender_m = new SelectListItem() { Value = "M", Text = "Male" };
                         var items = new[] { gender_o, gender_f, gender_m };
                     }
-                    <div class="7u 12u$(xsmall)">
-                        @Html.TextBoxFor(m => m.Kid1FirstName, new { id = "k1.FirstName", placeholder = "First Name" })
-                    </div>
-                    <div class="2u 12u$(xsmall)">
-                        @Html.TextBoxFor(m => m.Kid1Age, new { id = "k1.Age", placeholder = "Age", min = "0", max = "25" })
-                    </div>
-                    <div class="3u 12u$(xsmall)">
-                        <div class="select-wrapper">
-                            @Html.DropDownListFor(m => m.Kid1Gender, items , new { id = "k1.Gender" })
-                        </div>
-                    </div>
-                    <!-- Break -->
-                    <div class="7u 12u$(xsmall)">
-                        @Html.TextBoxFor(m => m.Kid2FirstName, new { id = "k2.FirstName", placeholder = "First Name" })
-                    </div>
-                    <div class="2u 12u$(xsmall)">
-                        @Html.TextBoxFor(m => m.Kid2Age, new { id = "k2.Age", placeholder = "Age", min = "0", max = "25" })
-                    </div>
-                    <div class="3u 12u$(xsmall)">
-                        <div class="select-wrapper">
-                            @Html.DropDownListFor(m => m.Kid2Gender, items, new { id = "k2.Gender" })
-                        </div>
-                    </div>
-                    <!-- Break -->
-                    <div class="7u 12u$(xsmall)">
-                        @Html.TextBoxFor(m => m.Kid3FirstName, new { id = "k3.FirstName", placeholder = "First Name" })
-                    </div>
-                    <div class="2u 12u$(xsmall)">
-                        @Html.TextBoxFor(m => m.Kid3Age, new { id = "k3.Age", placeholder = "Age", min = "0", max = "25" })
-                    </div>
-                    <div class="3u 12u$(xsmall)">
-                        <div class="select-wrapper">
-                            @Html.DropDownListFor(m => m.Kid3Gender, items, new { id = "k3.Gender" })
-                        </div>
-                    </div>
 
+                    @{
+                        for (int i = 0; i < 3; i++)
+                        {
+                            <div class="7u 12u$(xsmall)">
+                                @Html.TextBoxFor(m => m.Kids[i].FirstName, new {placeholder = "First Name" })
+                            </div>
+                            <div class="2u 12u$(xsmall)">
+                                @Html.TextBoxFor(m => m.Kids[i].Age, new { placeholder = "Age", min = "0", max = "35" })
+                            </div>
+                            <div class="3u 12u$(xsmall)">
+                                <div class="select-wrapper">
+                                    @Html.DropDownListFor(m => m.Kids[i].Gender, items)
+                                </div>
+                            </div>
+                        }
+                    }
                     <div class="row uniform" id="addKids">
                         <div class="3u 12u$(xsmall)">
                             <ul class="actions">
@@ -212,33 +193,24 @@
                         <div class="9u 12u$(xsmall)">
                         </div>
                     </div>
-
                 </div>
-
                 <div class="row uniform" id="kids+" name="kids+" style="display:none;">
-                    <div class="7u 12u$(xsmall)">
-                        @Html.TextBoxFor(m => m.Kid4FirstName, new { id = "k4.FirstName", placeholder = "First Name" })
-                    </div>
-                    <div class="2u 12u$(xsmall)">
-                        @Html.TextBoxFor(m => m.Kid4Age, new { id = "k4.Age", placeholder = "Age", min = "0", max = "25" })
-                    </div>
-                    <div class="3u 12u$(xsmall)">
-                        <div class="select-wrapper">
-                            @Html.DropDownListFor(m => m.Kid4Gender, items, new { id = "k4.Gender" })
-                        </div>
-                    </div>
-                    <!-- Break -->
-                    <div class="7u 12u$(xsmall)">
-                        @Html.TextBoxFor(m => m.Kid5FirstName, new { id = "k5.FirstName", placeholder = "First Name" })
-                    </div>
-                    <div class="2u 12u$(xsmall)">
-                        @Html.TextBoxFor(m => m.Kid5Age, new { id = "k5.Age", placeholder = "Age", min = "0", max = "25" })
-                    </div>
-                    <div class="3u 12u$(xsmall)">
-                        <div class="select-wrapper">
-                            @Html.DropDownListFor(m => m.Kid5Gender, items, new { id = "k5.Gender" })
-                        </div>
-                    </div>
+                    @{
+                        for (int i = 3; i < 5; i++)
+                        {
+                            <div class="7u 12u$(xsmall)">
+                                @Html.TextBoxFor(m => m.Kids[i].FirstName, new { placeholder = "First Name" })
+                            </div>
+                            <div class="2u 12u$(xsmall)">
+                                @Html.TextBoxFor(m => m.Kids[i].Age, new { placeholder = "Age", min = "0", max = "35" })
+                            </div>
+                            <div class="3u 12u$(xsmall)">
+                                <div class="select-wrapper">
+                                    @Html.DropDownListFor(m => m.Kids[i].Gender, items)
+                                </div>
+                            </div>
+                        }
+                    }
                 </div>
 
                 <!-- Break -->
@@ -268,118 +240,14 @@
 </section>
 
 @section JavaScript{
+    <script>
+            var kovil = '@Html.ValueFor(m => m.Kovil)';
+            var kovilPirivu = '@Html.ValueFor(m => m.KovilPirivu)';
+            var maritalStatus = '@Html.ValueFor(m=>m.MaritalStatus)';
+            var skovil = '@Html.ValueFor(m => m.SpouseKovil)';
+            var skovilPirivu = '@Html.ValueFor(m => m.SpouseKovilPirivu)';
+    </script>
     <script src="~/assets/js/nativeplaces.js"></script>
+    <script src="~/assets/js/contactform.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script>
-        var kovil = '@Html.ValueFor(m => m.Kovil)';
-        var kovilPirivu = '@Html.ValueFor(m => m.KovilPirivu)';
-        var maritalStatus = '@Html.ValueFor(m=>m.MaritalStatus)';
-        var skovil = '@Html.ValueFor(m => m.SpouseKovil)';
-        var skovilPirivu = '@Html.ValueFor(m => m.SpouseKovilPirivu)';
-    </script>
-    <script>
-        var data = {
-            "kovils": {
-                "Ilayatrangudi": ["Kazhani Vaasarkkudaiyar","Kinginikkoorudaiyar","Okkurudaiyar","Pattanasamiyar","Perusenthurudaiyar","Sirusenthurudaiyar","Perumaruthurudaiyar"],
-                "Mathur": ["Arumbakkur", "Kannur", "Karuppur", "Kulathur", "Mannur", "Manalur", "Uraiyur"],
-                "Vairavan_Kovil": ["Kazhani Vaasarkkudaiyar","Maruthenthirapuram","Periya vahuppu","Pilliyar vahuppu","Theyyanar vahuppu"]
-            }
-        }
-
-        $(document).ready(
-            function () {
-                
-                $("#nativePlace").autocomplete({
-                    source: nativePlaceList
-                });
-
-                $("#spouseNativePlace").autocomplete({
-                    source: nativePlaceList
-                });
-
-                if (kovil != '')
-                {
-                    $("#kovil").val(kovil);
-                    LoadPirivu(kovil, 'kovilPirivu');
-                    $("#kovilPirivu").val(kovilPirivu);
-                }
-                if(maritalStatus != '')
-                {
-                    ToogleSecForm(maritalStatus);
-                    if (skovil != '') {
-                        $("#spouseKovil").val(skovil);
-                        LoadPirivu(skovil, 'spouseKovilPirivu');
-                        $("#spouseKovilPirivu").val(skovilPirivu);
-                    }
-                }
-            }
-        );
-
-        //Image Preview
-        document.getElementById("f1.Image").onchange = function () {
-            var reader = new FileReader();
-
-            reader.onload = function (e) {
-                // get loaded data and render thumbnail.
-                document.getElementById("f1.ImagePreview").src = e.target.result;
-            };
-
-            // read the image file as a data URL.
-            reader.readAsDataURL(this.files[0]);
-        };
-
-        //Load Kovil Pirivu based on Kovil
-        function LoadPirivu(kovilname, target)
-        {
-            var pirivus = data.kovils[kovilname];
-            var selectHtml = "<option value=''> Choose Pirivu</option>";
-            if (pirivus)
-            {
-                for (var i = 0; i < pirivus.length; i++) {
-                    selectHtml += "<option value='" + pirivus[i] + "'>" + pirivus[i] + "</option>";
-                }
-            }
-            else
-            {
-                var selectHtml = "<option value='NoPirivu'> No Pirivu</option>";
-            }
-            document.getElementById(target).innerHTML = selectHtml;
-        }
-
-        function ToogleSecForm(mstatus)
-        {
-            var secForm = document.getElementById('spouse');
-            if (mstatus != 'S')
-            {
-                secForm.style.display = "block";
-                SpouseFormValidation(true);
-            }
-            else
-            {
-                secForm.style.display = "none";
-                SpouseFormValidation(false);
-            }
-            KidsReset();
-        }
-        function AddMore()
-        {
-            document.getElementById('addKids').style.display = "none";
-            document.getElementById('kids+').style.display = "block";
-        }
-        function KidsReset()
-        {
-            document.getElementById('addKids').style.display = "block";
-            document.getElementById('kids+').style.display = "none";
-        }
-        function SpouseFormValidation(status)
-        {
-            var fields = ["spouseFirstName", "spouseLastName", "spouseKovil","spouseKovilPirivu", "spouseNativePlace"];
-            for (var index in fields)
-            {
-                var field = fields[index];
-                document.getElementById(field).required = status;
-            };
-        }
-
-    </script>
 }

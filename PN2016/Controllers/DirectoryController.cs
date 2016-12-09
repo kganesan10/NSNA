@@ -12,7 +12,6 @@ using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web.Mvc;
 
 namespace PN2016.Controllers
@@ -42,7 +41,7 @@ namespace PN2016.Controllers
             }
 
             //Process Data to Create Data Model
-            FamilyContactModel familyContact = ProcessDBModel(model);
+            FamilyInfoDBModel familyContact = ProcessViewModeltoDBModel(model);
 
             //Insert into DB
             ContactInfoDB contactInfoDB = new ContactInfoDB();
@@ -50,16 +49,15 @@ namespace PN2016.Controllers
 
             //Upload Pic to Azure.
             var familyPic = model.FamilyPic;
-            if (familyPic != null && familyPic.ContentLength != 0)
+            if (familyPic != null && familyPic.ContentLength != 0 && !string.IsNullOrWhiteSpace(familyContact.FamilyPicFileName))
             {
-                var FileExtension = Path.GetExtension(familyPic.FileName);
-                var mediaFileName = familyContact.FamilyContactGuid + FileExtension;
+                var mediaFileName = familyContact.FamilyPicFileName;
                 new AzureFileStorage().UploadFile(mediaFileName, familyPic.InputStream);
             }
             
             //Send Email.
             GMailDispatcher mailDispatcher = new GMailDispatcher();
-            mailDispatcher.SendPN2016Message(familyContact.Email, familyContact.FirstName+ " "+ familyContact.LastName);
+            mailDispatcher.SendPN2016Message(familyContact.Email, familyContact.FirstName+ " "+ familyContact.LastName, familyContact.FamilyContactGuid);
             
             return View("CreateConfirm");
         }
@@ -72,18 +70,39 @@ namespace PN2016.Controllers
 
         public ActionResult Detail(string id)
         {
-            throw new NotImplementedException("View Detail - " + id + " - Coming Soon");
-            //return View();
+            if(string.IsNullOrEmpty(id))
+            {
+                return View("Error", new HandleErrorInfo(new Exception("Id is invalid."), "Directory", "Detail"));
+            }
+
+            ContactInfoDB contactInfo = new ContactInfoDB();
+            FamilyInfoDBModel familyInfoDBModel = contactInfo.SelectWithKidsInfo(id);
+            if (familyInfoDBModel == null || familyInfoDBModel.FamilyContactGuid == null)
+            {
+                return View("Error", new HandleErrorInfo(new Exception("User Id not found."), "Directory", "Detail"));
+            }
+            else
+            {
+                ContactInfoViewModel viewModel = ProcessDBModeltoViewModel(familyInfoDBModel);
+                if(viewModel == null)
+                {
+                    return View("Error", new HandleErrorInfo(new Exception("Error Processing Data."), "Directory", "Detail"));
+                }
+                else
+                {
+                    return View(viewModel);
+                }
+            }
         }
 
-        public ActionResult Update(string guid)
+        public ActionResult Edit(string guid)
         {
             throw new NotImplementedException("Update - Coming Soon");
             //return View();
         }
 
         [HttpPost]
-        public ActionResult Update(ContactInfoViewModel model)
+        public ActionResult Edit(ContactInfoViewModel model)
         {
             return View();
         }
@@ -115,13 +134,30 @@ namespace PN2016.Controllers
                 {
                     ModelState.AddModelError("Family Picture", "Only Images are allowed for Family Picture.");
                 }
+                model.FamilyPicFileExtn = fileExtension;
             }
 
+            //Validate Kids Information if present
+            foreach (var kidsInfo in model.Kids)
+            {
+                if (string.IsNullOrWhiteSpace(kidsInfo.FirstName) && !(kidsInfo.Age.HasValue) && string.IsNullOrWhiteSpace(kidsInfo.Gender))
+                {
+                    continue;
+                }
+                if (string.IsNullOrWhiteSpace(kidsInfo.FirstName))
+                    ModelState.AddModelError("Kid First Name", "Kid's First Name is required");
+                if (string.IsNullOrWhiteSpace(kidsInfo.Gender))
+                    ModelState.AddModelError("Kid Gender", "Kid's Gender is required");
+                if (!(kidsInfo.Age.HasValue))
+                {
+                    ModelState.AddModelError("Kid Age", "Kid's Age is required");
+                }
+            }
         }
 
-        private static FamilyContactModel ProcessDBModel(ContactInfoViewModel model)
+        private FamilyInfoDBModel ProcessViewModeltoDBModel(ContactInfoViewModel model)
         {
-            var familyContact = new FamilyContactModel();
+            var familyContact = new FamilyInfoDBModel();
             familyContact.FamilyContactGuid = Guid.NewGuid().ToString("N");
             familyContact.FirstName = string.IsNullOrWhiteSpace(model.FirstName) ? string.Empty : model.FirstName;
             familyContact.LastName = string.IsNullOrWhiteSpace(model.LastName) ? string.Empty : model.LastName;
@@ -140,11 +176,13 @@ namespace PN2016.Controllers
             familyContact.Kovil = string.IsNullOrWhiteSpace(model.Kovil) ? string.Empty : model.Kovil;
             familyContact.KovilPirivu = string.IsNullOrWhiteSpace(model.KovilPirivu) ? string.Empty : model.KovilPirivu;
             familyContact.NativePlace = string.IsNullOrWhiteSpace(model.NativePlace) ? string.Empty : model.NativePlace;
+            
+            familyContact.FamilyPicFileName = string.IsNullOrEmpty(model.FamilyPicFileExtn)? null: string.Concat(familyContact.FamilyContactGuid, model.FamilyPicFileExtn);
 
             //Attach Spouse
             if (familyContact.MaritalStatus == "M")
             {
-                var spouseInfo = new SpouseInfoModel();
+                var spouseInfo = new SpouseInfoDBModel();
                 spouseInfo.FirstName = string.IsNullOrWhiteSpace(model.SpouseFirstName) ? string.Empty : model.SpouseFirstName;
                 spouseInfo.LastName = string.IsNullOrWhiteSpace(model.SpouseLastName) ? string.Empty : model.SpouseLastName;
 
@@ -158,70 +196,83 @@ namespace PN2016.Controllers
                 familyContact.Spouse = spouseInfo;
             }
 
-            familyContact.Kids = new List<KidsInfoModel>();
+            familyContact.Kids = new List<KidsInfoDBModel>();
 
-
-            if (!string.IsNullOrWhiteSpace(model.Kid1FirstName) || !string.IsNullOrWhiteSpace(model.Kid1Age) || !string.IsNullOrWhiteSpace(model.Kid1Gender))
+            foreach(KidsViewModel kidsInfo in model.Kids)
             {
-                var kid1 = new KidsInfoModel();
-                kid1.FirstName = string.IsNullOrWhiteSpace(model.Kid1FirstName) ? string.Empty : model.Kid1FirstName;
-                var kidAgeStr = string.IsNullOrWhiteSpace(model.Kid1Age) ? "0" : model.Kid1Age;
-                int KidAge = 0;
-                int.TryParse(kidAgeStr, out KidAge);
-                kid1.Age = KidAge;
-                kid1.Gender = string.IsNullOrWhiteSpace(model.Kid1Gender) ? string.Empty : model.Kid1Gender;
-                familyContact.Kids.Add(kid1);
-            }
-
-            if (!string.IsNullOrWhiteSpace(model.Kid2FirstName) || !string.IsNullOrWhiteSpace(model.Kid2Age) || !string.IsNullOrWhiteSpace(model.Kid2Gender))
-            {
-                var kid2 = new KidsInfoModel();
-                kid2.FirstName = string.IsNullOrWhiteSpace(model.Kid2FirstName) ? string.Empty : model.Kid2FirstName;
-                var kidAgeStr = string.IsNullOrWhiteSpace(model.Kid2Age) ? "0" : model.Kid2Age;
-                int KidAge = 0;
-                int.TryParse(kidAgeStr, out KidAge);
-                kid2.Age = KidAge;
-                kid2.Gender = string.IsNullOrWhiteSpace(model.Kid2Gender) ? string.Empty : model.Kid2Gender;
-                familyContact.Kids.Add(kid2);
-            }
-
-            if (!string.IsNullOrWhiteSpace(model.Kid3FirstName) || !string.IsNullOrWhiteSpace(model.Kid3Age) || !string.IsNullOrWhiteSpace(model.Kid3Gender))
-            {
-                var kid3 = new KidsInfoModel();
-                kid3.FirstName = string.IsNullOrWhiteSpace(model.Kid3FirstName) ? string.Empty : model.Kid3FirstName;
-                var kidAgeStr = string.IsNullOrWhiteSpace(model.Kid3Age) ? "0" : model.Kid3Age;
-                int KidAge = 0;
-                int.TryParse(kidAgeStr, out KidAge);
-                kid3.Age = KidAge;
-                kid3.Gender = string.IsNullOrWhiteSpace(model.Kid3Gender) ? string.Empty : model.Kid3Gender;
-                familyContact.Kids.Add(kid3);
-            }
-
-            if (!string.IsNullOrWhiteSpace(model.Kid4FirstName) || !string.IsNullOrWhiteSpace(model.Kid4Age) || !string.IsNullOrWhiteSpace(model.Kid4Gender))
-            {
-                var kid4 = new KidsInfoModel();
-                kid4.FirstName = string.IsNullOrWhiteSpace(model.Kid4FirstName) ? string.Empty : model.Kid4FirstName;
-                var kidAgeStr = string.IsNullOrWhiteSpace(model.Kid4Age) ? "0" : model.Kid4Age;
-                int KidAge = 0;
-                int.TryParse(kidAgeStr, out KidAge);
-                kid4.Age = KidAge;
-                kid4.Gender = string.IsNullOrWhiteSpace(model.Kid4Gender) ? string.Empty : model.Kid4Gender;
-                familyContact.Kids.Add(kid4);
-            }
-
-            if (!string.IsNullOrWhiteSpace(model.Kid5FirstName) || !string.IsNullOrWhiteSpace(model.Kid5Age) || !string.IsNullOrWhiteSpace(model.Kid5Gender))
-            {
-                var kid5 = new KidsInfoModel();
-                kid5.FirstName = string.IsNullOrWhiteSpace(model.Kid5FirstName) ? string.Empty : model.Kid5FirstName;
-                var kidAgeStr = string.IsNullOrWhiteSpace(model.Kid5Age) ? "0" : model.Kid5Age;
-                int KidAge = 0;
-                int.TryParse(kidAgeStr, out KidAge);
-                kid5.Age = KidAge;
-                kid5.Gender = string.IsNullOrWhiteSpace(model.Kid5Gender) ? string.Empty : model.Kid5Gender;
-                familyContact.Kids.Add(kid5);
+                if (!string.IsNullOrWhiteSpace(kidsInfo.FirstName) || kidsInfo.Age.HasValue || !string.IsNullOrWhiteSpace(kidsInfo.Gender))
+                {
+                    var kid = new KidsInfoDBModel();
+                    kid.FirstName = string.IsNullOrWhiteSpace(kidsInfo.FirstName) ? string.Empty : kidsInfo.FirstName;
+                    kid.Age = kidsInfo.Age.HasValue ? kidsInfo.Age.Value : 0;
+                    kid.Gender = string.IsNullOrWhiteSpace(kidsInfo.Gender) ? string.Empty : kidsInfo.Gender;
+                    familyContact.Kids.Add(kid);
+                }
             }
 
             return familyContact;
+        }
+
+        private ContactInfoViewModel ProcessDBModeltoViewModel(FamilyInfoDBModel familyContactModel)
+        {
+            if (familyContactModel == null)
+                return null;
+
+            ContactInfoViewModel viewModel = new ContactInfoViewModel();
+
+            viewModel.FamilyContactGuid = familyContactModel.FamilyContactGuid;
+
+            viewModel.FirstName = familyContactModel.FirstName;
+            viewModel.LastName = familyContactModel.LastName;
+            viewModel.Gender = familyContactModel.Gender;
+            viewModel.MaritalStatus = familyContactModel.MaritalStatus;
+
+            viewModel.Email = familyContactModel.Email;
+            viewModel.HomePhone = familyContactModel.HomePhone;
+            viewModel.MobilePhone = familyContactModel.MobilePhone;
+
+            viewModel.Address = familyContactModel.Address;
+            viewModel.City = familyContactModel.City;
+            viewModel.State = familyContactModel.State;
+            viewModel.ZipCode = familyContactModel.ZipCode;
+
+            viewModel.Kovil = familyContactModel.Kovil;
+            viewModel.KovilPirivu = familyContactModel.KovilPirivu;
+            viewModel.NativePlace = familyContactModel.NativePlace;
+            
+            if(familyContactModel.Spouse != null && familyContactModel.MaritalStatus == "M")
+            {
+                viewModel.SpouseFirstName = familyContactModel.Spouse.FirstName;
+                viewModel.SpouseLastName = familyContactModel.Spouse.LastName;
+
+                viewModel.SpouseEmail = familyContactModel.Spouse.Email;
+                viewModel.SpouseMobilePhone = familyContactModel.Spouse.MobilePhone;
+
+                viewModel.SpouseKovil = familyContactModel.Spouse.Kovil;
+                viewModel.SpouseKovilPirivu = familyContactModel.Spouse.KovilPirivu;
+                viewModel.SpouseNativePlace = familyContactModel.Spouse.NativePlace;
+            }
+
+            if(!string.IsNullOrEmpty(familyContactModel.FamilyPicFileName))
+            {
+                viewModel.FamilyPicFilePath = "https://nsnane.blob.core.windows.net/profilepic/" + familyContactModel.FamilyPicFileName;
+            }
+            
+            if (familyContactModel.Kids.Count == 0)
+                return viewModel;
+
+            foreach(var kidsDBModel in familyContactModel.Kids)
+            {
+                var kid = new KidsViewModel
+                {
+                    FirstName = kidsDBModel.FirstName,
+                    Age = kidsDBModel.Age,
+                    Gender = kidsDBModel.Gender
+                };
+                viewModel.Kids.Add(kid);
+            }
+
+            return viewModel;
         }
     }
 
@@ -244,12 +295,14 @@ namespace PN2016.Controllers
             };
         }
 
-        public bool SendPN2016Message(string ToEmailAddress, string name)
+        public bool SendPN2016Message(string ToEmailAddress, string name, string familyGuid)
         {
             string subject = "Thanks for registering.";
+            var viewLink = "http://nsna-ne.azurewebsites.net/directory/detail/" + familyGuid;
             StringBuilder htmlBuilder = new StringBuilder();
             htmlBuilder.AppendFormat("Hi {0}, <br/>", name);
-            htmlBuilder.Append("Thanks for adding your contact info to 2016 Directory.<br/>We are very excited to meet you all in person during our Pillayar Nonbu event.<br/>");
+            htmlBuilder.AppendFormat("Thanks for adding your contact info to 2016 Directory.<br/>You can view the details here - <a href='{0}'>{0}</a>.<br/>", viewLink );
+            htmlBuilder.Append("We are very excited to meet you all in person during our Pillayar Nonbu event.<br/>");
             htmlBuilder.AppendFormat("For more up to date information, Please visit <a href='{0}'>{0}</a><br/><br/>", "http://nsna-ne.azurewebsites.net/");
             htmlBuilder.Append("Thanks, <br/>2016 Pillayar Nonbu Team");
 
@@ -280,7 +333,7 @@ namespace PN2016.Controllers
             connectionstring = ConfigurationManager.ConnectionStrings[CSName].ConnectionString;
         }
 
-        public void InsertFamilyInfo(FamilyContactModel model)
+        public void InsertFamilyInfo(FamilyInfoDBModel model)
         {
             using (SqlConnection connection = new SqlConnection(connectionstring))
             {
@@ -291,16 +344,16 @@ namespace PN2016.Controllers
             }
         }
 
-        public void InsertFamilyContact(SqlConnection connection, FamilyContactModel model)
+        public void InsertFamilyContact(SqlConnection connection, FamilyInfoDBModel model)
         {
-            string commonfields = "FamilyContactGuid, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus";
-            string commonParams = "@FamilyContactGuid, @FirstName, @Lastname, @Gender, @Email, @HomePhone, @MobilePhone, @Address, @City, @State, @ZipCode, @Kovil, @KovilPirivu, @NativePlace, @MaritalStatus";
+            string commonfields = "FamilyContactGuid, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
+            string commonParams = "@FamilyContactGuid, @FirstName, @Lastname, @Gender, @Email, @HomePhone, @MobilePhone, @Address, @City, @State, @ZipCode, @Kovil, @KovilPirivu, @NativePlace, @MaritalStatus,@FamilyPicFileName";
             string spousefields = "SpouseFirstName,SpouseLastName,SpouseEmail,SpouseMobilePhone,SpouseKovil,SpouseKovilPirivu,SpouseNativePlace";
             string spouseParams = "@SpouseFirstName,@SpouseLastName,@SpouseEmail,@SpouseMobilePhone,@SpouseKovil,@SpouseKovilPirivu,@SpouseNativePlace";
 
-            string query = "INSERT INTO dbo.FamilyContact (" + commonfields + ", CreatedOn) VALUES (" + commonParams + ",@CreatedOn )";
+            string query = "INSERT INTO dbo.FamilyContact (" + commonfields + ", CreatedOn, LastModifiedOn) VALUES (" + commonParams + ",@CreatedOn, @CreatedOn )";
             if (model.Spouse != null)
-                query = "INSERT INTO dbo.FamilyContact (" + commonfields + "," + spousefields + ", CreatedOn) VALUES (" + commonParams + "," + spouseParams + ",@CreatedOn )";
+                query = "INSERT INTO dbo.FamilyContact (" + commonfields + "," + spousefields + ", CreatedOn, LastModifiedOn) VALUES (" + commonParams + "," + spouseParams + ",@CreatedOn,@CreatedOn )";
 
             using (SqlCommand cmd = new SqlCommand(query, connection))
             {
@@ -320,7 +373,7 @@ namespace PN2016.Controllers
                 cmd.Parameters.Add("@KovilPirivu", SqlDbType.VarChar, 50).Value = model.KovilPirivu;
                 cmd.Parameters.Add("@NativePlace", SqlDbType.VarChar, 128).Value = model.NativePlace;
                 cmd.Parameters.Add("@MaritalStatus", SqlDbType.VarChar, 1).Value = model.MaritalStatus;
-
+                cmd.Parameters.Add("FamilyPicFileName", SqlDbType.VarChar, 128).Value = string.IsNullOrEmpty(model.FamilyPicFileName) ? Convert.DBNull : model.FamilyPicFileName;
                 if (model.Spouse != null)
                 {
                     var spouse = model.Spouse;
@@ -339,12 +392,12 @@ namespace PN2016.Controllers
             }
         }
 
-        public void InsertKidsInfo(SqlConnection connection, FamilyContactModel model)
+        public void InsertKidsInfo(SqlConnection connection, FamilyInfoDBModel model)
         {
             foreach (var kidsInfo in model.Kids)
             {
-                string kidsFields = "KidsInfoGuid,FamilyContactGuid,FirstName,Age,Gender,CreatedOn";
-                string kidsParams = "@KidsInfoGuid,@FamilyContactGuid,@FirstName,@Age,@Gender,@CreatedOn";
+                string kidsFields = "KidsInfoGuid,FamilyContactGuid,FirstName,Age,Gender,CreatedOn,LastModifiedOn";
+                string kidsParams = "@KidsInfoGuid,@FamilyContactGuid,@FirstName,@Age,@Gender,@CreatedOn,@CreatedOn";
                 string query = "INSERT INTO dbo.KidsInfo (" + kidsFields + ") VALUES (" + kidsParams + ")";
                 using (SqlCommand cmd = new SqlCommand(query, connection))
                 {
@@ -360,6 +413,92 @@ namespace PN2016.Controllers
             }
         }
 
+        public FamilyInfoDBModel SelectWithKidsInfo(string id)
+        {
+            FamilyInfoDBModel familyDBModel = new FamilyInfoDBModel();
+            using (SqlConnection connection = new SqlConnection(connectionstring))
+            {
+                connection.Open();
+                var fields = "FamilyContactGuid, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
+                var spouseFields = "SpouseFirstName,SpouseLastName,SpouseEmail,SpouseMobilePhone,SpouseKovil,SpouseKovilPirivu,SpouseNativePlace";
+                string query = "SELECT " + fields + ","+ spouseFields + ", CreatedOn, LastModifiedOn FROM FamilyContact WHERE FamilyContactGuid = @FamilyContactGuid";
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.Add("@FamilyContactGuid", SqlDbType.VarChar, 128).Value = id;
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                familyDBModel.FamilyContactGuid = reader.GetString(0);
+                                familyDBModel.FirstName = reader.GetString(1);
+                                familyDBModel.LastName = reader.GetString(2);
+                                familyDBModel.Gender = reader.GetString(3);
+
+                                familyDBModel.Email = reader.GetString(4);
+                                familyDBModel.HomePhone = reader.GetString(5);
+                                familyDBModel.MobilePhone = reader.IsDBNull(6) ? null : reader.GetString(6);
+
+                                familyDBModel.Address = reader.IsDBNull(7) ? null : reader.GetString(7);
+                                familyDBModel.City = reader.GetString(8);
+                                familyDBModel.State = reader.GetString(9);
+                                familyDBModel.ZipCode = reader.IsDBNull(10) ? null : reader.GetString(10);
+
+                                familyDBModel.Kovil = reader.GetString(11);
+                                familyDBModel.KovilPirivu = reader.GetString(12);
+                                familyDBModel.NativePlace = reader.GetString(13);
+                                familyDBModel.MaritalStatus = reader.GetString(14);
+                                familyDBModel.FamilyPicFileName = reader.IsDBNull(15) ? null : reader.GetString(15);
+
+                                if (familyDBModel.MaritalStatus == "M")
+                                {
+                                    familyDBModel.Spouse = new SpouseInfoDBModel();
+                                    familyDBModel.Spouse.FirstName = reader.GetString(16);
+                                    familyDBModel.Spouse.LastName = reader.GetString(17);
+
+                                    familyDBModel.Spouse.Email = reader.IsDBNull(18) ? null : reader.GetString(18); ;
+                                    familyDBModel.Spouse.MobilePhone = reader.IsDBNull(19) ? null : reader.GetString(19); ;
+
+                                    familyDBModel.Spouse.Kovil = reader.GetString(20);
+                                    familyDBModel.Spouse.KovilPirivu = reader.GetString(21);
+                                    familyDBModel.Spouse.NativePlace = reader.GetString(22);
+                                }
+
+                                familyDBModel.CreatedOn = reader.IsDBNull(23) ? DateTime.MinValue : reader.GetDateTime(23);
+                                familyDBModel.LastModifiedOn = reader.IsDBNull(24) ? DateTime.MinValue : reader.GetDateTime(24);
+                            }
+                        }
+                        reader.Close();
+                    }
+                }
+                var kidsField = "KidsInfoGuid,FirstName,Age,Gender";
+                string kidsInfoQuery = "SELECT " + kidsField + " FROM KidsInfo WHERE FamilyContactGuid = @FamilyContactGuid";
+                using (SqlCommand cmd = new SqlCommand(kidsInfoQuery, connection))
+                {
+                    cmd.Parameters.Add("@FamilyContactGuid", SqlDbType.VarChar, 128).Value = id;
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            familyDBModel.Kids = new List<KidsInfoDBModel>();
+                            while (reader.Read())
+                            {
+                                var kidsInfo = new KidsInfoDBModel();
+                                kidsInfo.KidsInfoGuid = reader.GetString(0);
+                                kidsInfo.FirstName = reader.IsDBNull(1) ? null : reader.GetString(1);
+                                kidsInfo.Age = reader.GetInt16(2);
+                                kidsInfo.Gender = reader.IsDBNull(3) ? null : reader.GetString(3);
+                                familyDBModel.Kids.Add(kidsInfo);
+                            }
+                        }
+                        reader.Close();
+                    }
+                }
+                connection.Close();
+            }
+            return familyDBModel;
+        }
     }
 
     public class AzureFileStorage

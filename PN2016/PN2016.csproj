@@ -213,10 +213,8 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\DirectoryViewModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
-    <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
@@ -231,6 +229,7 @@
     <Content Include="assets\fonts\fontawesome-webfont.woff" />
     <Content Include="assets\fonts\fontawesome-webfont.woff2" />
     <Content Include="assets\fonts\FontAwesome.otf" />
+    <Content Include="assets\js\contactform.js" />
     <Content Include="assets\js\ie\html5shiv.js" />
     <Content Include="assets\js\ie\respond.min.js" />
     <Content Include="assets\js\jquery.min.js" />
@@ -258,7 +257,7 @@
     <Content Include="images\13_boyDress.jpg" />
     <Content Include="images\14_pillayarPic.jpg" />
     <Content Include="images\15_bagPen.jpg" />
-    <Content Include="images\16_canvasArt.jpg" />
+    <Content Include="images\16_pen.jpg" />
     <Content Include="images\17_others.jpg" />
     <Content Include="images\dn.pillayar03.jpg" />
     <Content Include="images\dressExchange.jpg" />
@@ -338,6 +337,7 @@
     <Content Include="Views\Directory\Create.cshtml" />
     <Content Include="Views\Directory\CreateConfirm.cshtml" />
     <Content Include="Views\DressExchange\Index.cshtml" />
+    <Content Include="Views\Directory\Detail.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
