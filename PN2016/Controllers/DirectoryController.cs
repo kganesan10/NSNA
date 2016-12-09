@@ -301,7 +301,7 @@ namespace PN2016.Controllers
             var viewLink = "http://nsna-ne.azurewebsites.net/directory/detail/" + familyGuid;
             StringBuilder htmlBuilder = new StringBuilder();
             htmlBuilder.AppendFormat("Hi {0}, <br/>", name);
-            htmlBuilder.AppendFormat("Thanks for adding your contact info to 2016 Directory.<br/>You can view the details here - <a href='{0}'>{0}</a>.<br/>", viewLink );
+            htmlBuilder.AppendFormat("Thanks for adding your contact info to 2016 Directory.<br/>You can view the details here - <a href='{0}'>{0}</a><br/>", viewLink );
             htmlBuilder.Append("We are very excited to meet you all in person during our Pillayar Nonbu event.<br/>");
             htmlBuilder.AppendFormat("For more up to date information, Please visit <a href='{0}'>{0}</a><br/><br/>", "http://nsna-ne.azurewebsites.net/");
             htmlBuilder.Append("Thanks, <br/>2016 Pillayar Nonbu Team");
