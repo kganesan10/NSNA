@@ -123,7 +123,12 @@
                 </div>
             }
             <br/>
-            <img src="@Html.DisplayFor(model => model.FamilyPicFilePath)" alt="family Pic"/>
+            @{
+                if (!string.IsNullOrEmpty(Model.FamilyPicFilePath))
+                {
+                    <img src="@Html.DisplayFor(model => model.FamilyPicFilePath)" alt="family Pic" style="max-height:300px;max-width:300px;" />
+                }
+            }
          </div>
     </div>
 </section>
