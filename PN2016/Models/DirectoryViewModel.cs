@@ -121,4 +121,19 @@ namespace PN2016.Models
         [Display(Name = "Gender", GroupName = "Kids")]
         public string Gender { get; set; }
     }
+
+    public class ContactListViewModel
+    {
+        public string FamilyContactGuid { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Gender { get; set; }
+        public string Email { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Kovil { get; set; }
+        public string KovilPirivu { get; set; }
+        public string NativePlace { get; set; }
+        public string MaritalStatus { get; set; }
+    }
 }

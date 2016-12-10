@@ -338,6 +338,7 @@
     <Content Include="Views\Directory\CreateConfirm.cshtml" />
     <Content Include="Views\DressExchange\Index.cshtml" />
     <Content Include="Views\Directory\Detail.cshtml" />
+    <Content Include="Views\Directory\List.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

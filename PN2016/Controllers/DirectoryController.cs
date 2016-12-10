@@ -64,8 +64,9 @@ namespace PN2016.Controllers
 
         public ActionResult List()
         {
-            throw new NotImplementedException("List All - Coming Soon");
-            //return View();
+            ContactInfoDB contactInfoDB = new ContactInfoDB();
+            var allContacts = contactInfoDB.SelectAllforList();
+            return View(allContacts);
         }
 
         public ActionResult Detail(string id)
@@ -258,7 +259,7 @@ namespace PN2016.Controllers
                 viewModel.FamilyPicFilePath = "https://nsnane.blob.core.windows.net/profilepic/" + familyContactModel.FamilyPicFileName;
             }
             
-            if (familyContactModel.Kids.Count == 0)
+            if (familyContactModel.Kids == null || familyContactModel.Kids.Count == 0)
                 return viewModel;
 
             foreach(var kidsDBModel in familyContactModel.Kids)
@@ -498,6 +499,43 @@ namespace PN2016.Controllers
                 connection.Close();
             }
             return familyDBModel;
+        }
+
+        public List<ContactListViewModel> SelectAllforList()
+        {
+            List<ContactListViewModel> contacts = new List<ContactListViewModel>();
+            using (SqlConnection connection = new SqlConnection(connectionstring))
+            {
+                connection.Open();
+                var fields = "FamilyContactGuid, FirstName, Lastname, Gender, Email, City, State,Kovil, KovilPirivu, NativePlace,MaritalStatus";
+                string query = "SELECT " + fields +  " FROM FamilyContact";
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var contact = new ContactListViewModel();
+                                contact.FamilyContactGuid = reader.GetString(0);
+                                contact.FirstName = reader.GetString(1);
+                                contact.LastName = reader.GetString(2);
+                                contact.Gender = reader.GetString(3);
+                                contact.Email = reader.GetString(4);
+                                contact.City = reader.GetString(5);
+                                contact.State = reader.GetString(6);
+                                contact.Kovil = reader.GetString(7);
+                                contact.KovilPirivu = reader.GetString(8);
+                                contact.NativePlace = reader.GetString(9);
+                                contact.MaritalStatus = reader.GetString(10);
+                                contacts.Add(contact);
+                            }
+                        }
+                    }
+                }
+            }
+            return contacts;
         }
     }
 

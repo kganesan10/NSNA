@@ -1,0 +1,50 @@
+﻿@model IEnumerable<PN2016.Models.ContactListViewModel>
+@{
+    ViewBag.Title = "Contact List";
+}
+<h2>Contact List</h2>
+<section>
+    <div class="12u 12u$(medium)">
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Location</th>
+                        <th>Native Place</th>
+                        <th>Kovil</th>
+                        <th>Detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var location = string.Format("{0}, {1}", item.City, item.State);
+                        <tr>
+                            <td>@item.FirstName</td>
+                            <td>@item.LastName</td>
+                            <td>@item.Email</td>
+                            <td>@location</td>
+                            <td>@item.NativePlace</td>
+                            <td>@item.Kovil</td>
+                            <td>@Html.ActionLink("Details", "detail", new {  id=item.FamilyContactGuid })</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="7"><!-- Admin Action can be added Later --></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+            
