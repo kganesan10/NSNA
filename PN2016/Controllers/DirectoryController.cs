@@ -508,7 +508,7 @@ namespace PN2016.Controllers
             {
                 connection.Open();
                 var fields = "FamilyContactGuid, FirstName, Lastname, Gender, Email, City, State,Kovil, KovilPirivu, NativePlace,MaritalStatus";
-                string query = "SELECT " + fields +  " FROM FamilyContact";
+                string query = "SELECT " + fields +  " FROM FamilyContact Order by CreatedOn desc";
                 using (SqlCommand cmd = new SqlCommand(query, connection))
                 {
                     using (SqlDataReader reader = cmd.ExecuteReader())
