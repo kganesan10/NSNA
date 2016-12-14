@@ -1,7 +1,14 @@
 USE [Nsna2016Directory]
 GO
 
-/****** Object:  Table [dbo].[KidsInfo]    Script Date: 12/5/2016 9:28:18 PM ******/
+ALTER TABLE [dbo].[KidsInfo] DROP CONSTRAINT [FK_KidsInfo_FamilyContact]
+GO
+
+/****** Object:  Table [dbo].[KidsInfo]    Script Date: 12/12/2016 4:08:43 PM ******/
+DROP TABLE [dbo].[KidsInfo]
+GO
+
+/****** Object:  Table [dbo].[KidsInfo]    Script Date: 12/12/2016 4:08:43 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -20,10 +27,10 @@ CREATE TABLE [dbo].[KidsInfo](
 	[CreatedOn] [datetime] NULL,
 	[LastModifiedOn] [datetime] NULL,
 	[RowVersion] [timestamp] NOT NULL,
-	 CONSTRAINT [PK_KidsInfo] PRIMARY KEY CLUSTERED 
-	(
-		[KidsInfoGuid] ASC
-	)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+ CONSTRAINT [PK_KidsInfo] PRIMARY KEY CLUSTERED 
+(
+	[KidsInfoGuid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 )
 
 GO

@@ -1,7 +1,11 @@
 USE [Nsna2016Directory]
 GO
 
-/****** Object:  Table [dbo].[FamilyContact]    Script Date: 12/5/2016 9:27:02 PM ******/
+/****** Object:  Table [dbo].[FamilyContact]    Script Date: 12/12/2016 4:07:55 PM ******/
+DROP TABLE [dbo].[FamilyContact]
+GO
+
+/****** Object:  Table [dbo].[FamilyContact]    Script Date: 12/12/2016 4:07:56 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -27,6 +31,7 @@ CREATE TABLE [dbo].[FamilyContact](
 	[KovilPirivu] [nvarchar](50) NOT NULL,
 	[NativePlace] [nvarchar](128) NOT NULL,
 	[MaritalStatus] [varchar](1) NOT NULL,
+	[FamilyPicFileName] [nvarchar](128) NULL,
 	[SpouseFirstName] [nvarchar](50) NULL,
 	[SpouseLastName] [nvarchar](50) NULL,
 	[SpouseEmail] [nvarchar](128) NULL,
@@ -37,10 +42,10 @@ CREATE TABLE [dbo].[FamilyContact](
 	[CreatedOn] [datetime] NULL,
 	[LastModifiedOn] [datetime] NULL,
 	[RowVersion] [timestamp] NOT NULL,
-	 CONSTRAINT [PK_FamilyContact] PRIMARY KEY CLUSTERED 
-	(
-		[FamilyContactGuid] ASC
-	)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+ CONSTRAINT [PK_FamilyContact] PRIMARY KEY CLUSTERED 
+(
+	[FamilyContactGuid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 )
 
 GO
