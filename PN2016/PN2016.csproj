@@ -276,6 +276,7 @@
     <Content Include="images\pic11.jpg" />
     <Content Include="images\Shyam_ML.jpg" />
     <Content Include="images\Usha_NYLIC.jpg" />
+    <Content Include="images\Visa_RM.jpg" />
     <Content Include="LICENSE.txt" />
     <Content Include="README.txt" />
     <Content Include="Scripts\bootstrap.js" />
