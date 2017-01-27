@@ -184,7 +184,8 @@ namespace PN2016.Controllers
         private FamilyInfoDBModel ProcessViewModeltoDBModel(ContactInfoViewModel model)
         {
             var familyContact = new FamilyInfoDBModel();
-            familyContact.FamilyContactGuid = Guid.NewGuid().ToString("N");
+            familyContact.FamilyContactGuid = string.IsNullOrWhiteSpace(model.FamilyContactGuid) ? 
+                Guid.NewGuid().ToString("N") : model.FamilyContactGuid;
             familyContact.FirstName = string.IsNullOrWhiteSpace(model.FirstName) ? string.Empty : model.FirstName;
             familyContact.LastName = string.IsNullOrWhiteSpace(model.LastName) ? string.Empty : model.LastName;
             familyContact.Gender = string.IsNullOrWhiteSpace(model.Gender) ? string.Empty : model.Gender;
@@ -229,6 +230,8 @@ namespace PN2016.Controllers
                 if (!string.IsNullOrWhiteSpace(kidsInfo.FirstName) || kidsInfo.Age.HasValue || !string.IsNullOrWhiteSpace(kidsInfo.Gender))
                 {
                     var kid = new KidsInfoDBModel();
+                    kid.KidsInfoGuid = string.IsNullOrWhiteSpace(kidsInfo.KidsInfoGuid) ? Guid.NewGuid().ToString("N") : kidsInfo.KidsInfoGuid;
+                    kid.FamilyContactGuid = familyContact.FamilyContactGuid;
                     kid.FirstName = string.IsNullOrWhiteSpace(kidsInfo.FirstName) ? string.Empty : kidsInfo.FirstName;
                     kid.Age = kidsInfo.Age.HasValue ? kidsInfo.Age.Value : 0;
                     kid.Gender = string.IsNullOrWhiteSpace(kidsInfo.Gender) ? string.Empty : kidsInfo.Gender;
@@ -364,23 +367,36 @@ namespace PN2016.Controllers
             using (SqlConnection connection = new SqlConnection(connectionstring))
             {
                 connection.Open();
-                InsertFamilyContact(connection, model);
-                InsertKidsInfo(connection, model);
+                InsertOrUpdateFamilyContact(connection, model, () => GetFamilyInfoInsertQuery(model.Spouse != null));
+                InsertOrUpdateKidsInfo(connection, model, () => GetKidsInfoInsertQuery());
                 connection.Close();
             }
         }
 
-        public void InsertFamilyContact(SqlConnection connection, FamilyInfoDBModel model)
+        private string GetFamilyInfoInsertQuery(bool married)
         {
             string commonfields = "FamilyContactGuid, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
             string commonParams = "@FamilyContactGuid, @FirstName, @Lastname, @Gender, @Email, @HomePhone, @MobilePhone, @Address, @City, @State, @ZipCode, @Kovil, @KovilPirivu, @NativePlace, @MaritalStatus,@FamilyPicFileName";
             string spousefields = "SpouseFirstName,SpouseLastName,SpouseEmail,SpouseMobilePhone,SpouseKovil,SpouseKovilPirivu,SpouseNativePlace";
             string spouseParams = "@SpouseFirstName,@SpouseLastName,@SpouseEmail,@SpouseMobilePhone,@SpouseKovil,@SpouseKovilPirivu,@SpouseNativePlace";
 
-            string query = "INSERT INTO dbo.FamilyContact (" + commonfields + ", CreatedOn, LastModifiedOn) VALUES (" + commonParams + ",@CreatedOn, @CreatedOn )";
-            if (model.Spouse != null)
-                query = "INSERT INTO dbo.FamilyContact (" + commonfields + "," + spousefields + ", CreatedOn, LastModifiedOn) VALUES (" + commonParams + "," + spouseParams + ",@CreatedOn,@CreatedOn )";
+            string query = "INSERT INTO dbo.FamilyContact (" + commonfields + ", CreatedOn, LastModifiedOn) VALUES (" + commonParams + ",@CreatedOn, @LastModifiedOn )";
+            if (married)
+                query = "INSERT INTO dbo.FamilyContact (" + commonfields + "," + spousefields + ", CreatedOn, LastModifiedOn) VALUES (" + commonParams + "," + spouseParams + ",@CreatedOn,@LastModifiedOn )";
+            return query;
+        }
 
+        private string GetKidsInfoInsertQuery()
+        {
+            string kidsFields = "KidsInfoGuid,FamilyContactGuid,FirstName,Age,Gender,CreatedOn,LastModifiedOn";
+            string kidsParams = "@KidsInfoGuid,@FamilyContactGuid,@FirstName,@Age,@Gender,@CreatedOn,@LastModifiedOn";
+            string query = "INSERT INTO dbo.KidsInfo (" + kidsFields + ") VALUES (" + kidsParams + ")";
+            return query;
+        }
+
+        private void InsertOrUpdateFamilyContact(SqlConnection connection, FamilyInfoDBModel model, Func<string> getQuery)
+        {
+            string query = getQuery();
             using (SqlCommand cmd = new SqlCommand(query, connection))
             {
                 // Primary Contact Value
@@ -414,26 +430,26 @@ namespace PN2016.Controllers
                     cmd.Parameters.Add("@SpouseNativePlace", SqlDbType.VarChar, 128).Value = spouse.NativePlace;
                 }
                 cmd.Parameters.Add("@CreatedOn", SqlDbType.DateTime).Value = DateTime.Now.ToLocalTime();
+                cmd.Parameters.Add("@LastModifiedOn", SqlDbType.DateTime).Value = DateTime.Now.ToLocalTime();
                 cmd.ExecuteNonQuery();
             }
         }
 
-        public void InsertKidsInfo(SqlConnection connection, FamilyInfoDBModel model)
+        private void InsertOrUpdateKidsInfo(SqlConnection connection, FamilyInfoDBModel model, Func<string> getQuery)
         {
             foreach (var kidsInfo in model.Kids)
             {
-                string kidsFields = "KidsInfoGuid,FamilyContactGuid,FirstName,Age,Gender,CreatedOn,LastModifiedOn";
-                string kidsParams = "@KidsInfoGuid,@FamilyContactGuid,@FirstName,@Age,@Gender,@CreatedOn,@CreatedOn";
-                string query = "INSERT INTO dbo.KidsInfo (" + kidsFields + ") VALUES (" + kidsParams + ")";
+                string query = getQuery();
                 using (SqlCommand cmd = new SqlCommand(query, connection))
                 {
                     // Primary Contact Value
-                    cmd.Parameters.Add("@KidsInfoGuid", SqlDbType.VarChar, 128).Value = Guid.NewGuid().ToString("N");
-                    cmd.Parameters.Add("@FamilyContactGuid", SqlDbType.VarChar, 128).Value = model.FamilyContactGuid;
+                    cmd.Parameters.Add("@KidsInfoGuid", SqlDbType.VarChar, 128).Value = kidsInfo.KidsInfoGuid;
+                    cmd.Parameters.Add("@FamilyContactGuid", SqlDbType.VarChar, 128).Value = kidsInfo.FamilyContactGuid;
                     cmd.Parameters.Add("@FirstName", SqlDbType.VarChar, 50).Value = kidsInfo.FirstName;
                     cmd.Parameters.Add("@Age", SqlDbType.SmallInt, 50).Value = kidsInfo.Age;
                     cmd.Parameters.Add("@Gender", SqlDbType.VarChar, 1).Value = kidsInfo.Gender;
                     cmd.Parameters.Add("@CreatedOn", SqlDbType.DateTime).Value = DateTime.Now.ToLocalTime();
+                    cmd.Parameters.Add("@LastModifiedOn", SqlDbType.DateTime).Value = DateTime.Now.ToLocalTime();
                     cmd.ExecuteNonQuery();
                 }
             }
