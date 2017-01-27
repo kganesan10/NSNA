@@ -1,24 +1,18 @@
 ﻿@model PN2016.Models.ContactInfoViewModel
 @{
-    ViewBag.Title = "2016 Directory";
+    ViewBag.Title = "Contact Details";
 }
 
 @section StyleSheets{
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 }
 
-<section>
-    <h2 id="content"><a name="directory"></a>2016 Directory (NY/NJ/CT/PA)</h2>
-    <p>
-        As part of 2016 PN function we planned to collect contact information of Nagarathars in our region. <br />
-        Please fill out the below form and submit the information for this year directory. The directory will be available on request.
-    </p>
-</section>
+<h2 id="content">Edit Contact Info</h2>
 
 <section>
     <div class="row">
         <div class="11u$ 12u$(medium)">
-            @using (Html.BeginForm("Create", "Directory", FormMethod.Post, new { encType = "multipart/form-data" }))
+            @using (Html.BeginForm("Edit", "Directory", FormMethod.Post, new { encType = "multipart/form-data" }))
             {
 
                 <h3>Contact Info. Form</h3>
@@ -234,7 +228,7 @@
                 <div class="row uniform">
                     <div class="12u$">
                         <ul class="actions">
-                            <li><input type="submit" value="Submit Info." class="special" /></li>
+                            <li><input type="submit" value="Update Info." class="special" /></li>
                             <li><input type="reset" value="Reset" /></li>
                         </ul>
                     </div>

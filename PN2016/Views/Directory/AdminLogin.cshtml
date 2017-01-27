@@ -1,0 +1,40 @@
+﻿@model PN2016.Models.AdminLoginViewModel
+@{
+    ViewBag.Title = "Contact List";
+}
+
+@section StyleSheets{
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+}
+<h2>Contact List</h2>
+<section>
+    <div class="row">
+        <div class="4u$ 12u$(medium)">
+            @using (Html.BeginForm("List", "Directory", FormMethod.Post))
+            {
+                <h3>Admin - Login</h3>
+                <div class="row uniform">
+                    <div class="12u 12u$(medium)">
+                        @Html.ValidationSummary("", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="row uniform" id="primary">
+                    <div class="12u 12u$(xsmall)">
+                        @Html.TextBoxFor(m => m.UserName, new { id = "username", placeholder = "User Name", required = "required" })
+                    </div>
+                    <div class="12u 12u$(xsmall)">
+                        @Html.TextBoxFor(m => m.Password, new { type = "password", id = "password", placeholder = "Password", required = "required" })
+                    </div>
+                </div>
+                <!-- Break -->
+                <div class="row uniform">
+                    <div class="12u$">
+                        <ul class="actions">
+                            <li><input type="submit" value="Login" class="special" /></li>
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>

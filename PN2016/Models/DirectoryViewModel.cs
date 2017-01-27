@@ -120,6 +120,8 @@ namespace PN2016.Models
 
         [Display(Name = "Gender", GroupName = "Kids")]
         public string Gender { get; set; }
+
+        public string KidsInfoGuid { get; set; }
     }
 
     public class ContactListViewModel

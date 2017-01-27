@@ -62,11 +62,36 @@ namespace PN2016.Controllers
             return View("CreateConfirm");
         }
 
-        public ActionResult List()
+        public ActionResult List786()
         {
             ContactInfoDB contactInfoDB = new ContactInfoDB();
             var allContacts = contactInfoDB.SelectAllforList();
-            return View(allContacts);
+            return View("List", allContacts);
+        }
+
+        public ActionResult List()
+        {
+            return View("adminLogin");
+        }
+
+        [HttpPost]
+        public ActionResult List(AdminLoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("adminLogin", model);
+            }
+            if (!AuthAdmin(model.UserName, model.Password))
+            {
+                ModelState.AddModelError("Login", "Username Password is invalid");
+                return View("adminLogin", model);
+            }
+            return List786();
+        }
+
+        private bool AuthAdmin(string username, string password)
+        {
+            return (username == "admin" && password == "2017PN@dmin");
         }
 
         public ActionResult Detail(string id)
@@ -552,6 +577,7 @@ namespace PN2016.Controllers
         {
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             CloudBlobContainer container = blobClient.GetContainerReference("profilepic");
+            //CloudBlobContainer container = blobClient.GetContainerReference("profilepic-test");
             if (!container.Exists()) return false;
             CloudBlockBlob imageBlob = container.GetBlockBlobReference(fileName);
             imageBlob.UploadFromStream(mediaStream);
