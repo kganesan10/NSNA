@@ -57,7 +57,7 @@ namespace PN2016.Controllers
             
             //Send Email.
             GMailDispatcher mailDispatcher = new GMailDispatcher();
-            mailDispatcher.SendPN2016Message(familyContact.Email, familyContact.FirstName+ " "+ familyContact.LastName, familyContact.FamilyContactGuid);
+            mailDispatcher.SendCreateConfirmMsg(familyContact.Email, familyContact.FirstName+ " "+ familyContact.LastName, familyContact.FamilyContactGuid);
             
             return View("CreateConfirm");
         }
@@ -121,16 +121,66 @@ namespace PN2016.Controllers
             }
         }
 
-        public ActionResult Edit(string guid)
+        public ActionResult Edit(string id)
         {
-            throw new NotImplementedException("Update - Coming Soon");
-            //return View();
+            if (string.IsNullOrEmpty(id))
+            {
+                return View("Error", new HandleErrorInfo(new Exception("Id is invalid."), "Directory", "Detail"));
+            }
+
+            ContactInfoDB contactInfo = new ContactInfoDB();
+            FamilyInfoDBModel familyInfoDBModel = contactInfo.SelectWithKidsInfo(id);
+            if (familyInfoDBModel == null || familyInfoDBModel.FamilyContactGuid == null)
+            {
+                return View("Error", new HandleErrorInfo(new Exception("User Id not found."), "Directory", "Detail"));
+            }
+            else
+            {
+                ContactInfoViewModel viewModel = ProcessDBModeltoViewModel(familyInfoDBModel);
+                if (viewModel == null)
+                {
+                    return View("Error", new HandleErrorInfo(new Exception("Error Processing Data."), "Directory", "Detail"));
+                }
+                var kidsCount = (viewModel.Kids == null) ? 0 : viewModel.Kids.Count;
+                //Fill in the rest of the Kids field with empty string for view
+                for (int i = 0; i < (5 - kidsCount); i++)
+                {
+                    viewModel.Kids.Add(new KidsViewModel());
+                }
+                return View(viewModel);
+            }
         }
 
         [HttpPost]
         public ActionResult Edit(ContactInfoViewModel model)
         {
-            return View();
+            ValidateModel(model);
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            
+            //Process Data to Create Data Model
+            FamilyInfoDBModel familyContact = ProcessViewModeltoDBModel(model);
+
+            //Insert into DB
+            ContactInfoDB contactInfoDB = new ContactInfoDB();
+            contactInfoDB.UpdateFamilyInfo(familyContact);
+
+            //Upload Pic to Azure.
+            var familyPic = model.FamilyPic;
+            if (familyPic != null && familyPic.ContentLength != 0 && !string.IsNullOrWhiteSpace(familyContact.FamilyPicFileName))
+            {
+                var mediaFileName = familyContact.FamilyPicFileName;
+                new AzureFileStorage().UploadFile(mediaFileName, familyPic.InputStream);
+            }
+
+            //Send Email.
+            GMailDispatcher mailDispatcher = new GMailDispatcher();
+            mailDispatcher.SendEditConfirmMsg(familyContact.Email, familyContact.FirstName + " " + familyContact.LastName, familyContact.FamilyContactGuid);
+
+            return RedirectToAction("Detail", new { id = model.FamilyContactGuid });
         }
 
 
@@ -184,8 +234,8 @@ namespace PN2016.Controllers
         private FamilyInfoDBModel ProcessViewModeltoDBModel(ContactInfoViewModel model)
         {
             var familyContact = new FamilyInfoDBModel();
-            familyContact.FamilyContactGuid = string.IsNullOrWhiteSpace(model.FamilyContactGuid) ? 
-                Guid.NewGuid().ToString("N") : model.FamilyContactGuid;
+            var isNewFamilyContact = string.IsNullOrWhiteSpace(model.FamilyContactGuid);
+            familyContact.FamilyContactGuid = isNewFamilyContact ? Guid.NewGuid().ToString("N") : model.FamilyContactGuid;
             familyContact.FirstName = string.IsNullOrWhiteSpace(model.FirstName) ? string.Empty : model.FirstName;
             familyContact.LastName = string.IsNullOrWhiteSpace(model.LastName) ? string.Empty : model.LastName;
             familyContact.Gender = string.IsNullOrWhiteSpace(model.Gender) ? string.Empty : model.Gender;
@@ -205,6 +255,10 @@ namespace PN2016.Controllers
             familyContact.NativePlace = string.IsNullOrWhiteSpace(model.NativePlace) ? string.Empty : model.NativePlace;
             
             familyContact.FamilyPicFileName = string.IsNullOrEmpty(model.FamilyPicFileExtn)? null: string.Concat(familyContact.FamilyContactGuid, model.FamilyPicFileExtn);
+            if (familyContact.FamilyPicFileName == null && model.FamilyPicFilePath != null)
+            {
+                familyContact.FamilyPicFileName = model.FamilyPicFilePath.Substring(model.FamilyPicFilePath.LastIndexOf('/')+1);
+            }
 
             //Attach Spouse
             if (familyContact.MaritalStatus == "M")
@@ -230,7 +284,8 @@ namespace PN2016.Controllers
                 if (!string.IsNullOrWhiteSpace(kidsInfo.FirstName) || kidsInfo.Age.HasValue || !string.IsNullOrWhiteSpace(kidsInfo.Gender))
                 {
                     var kid = new KidsInfoDBModel();
-                    kid.KidsInfoGuid = string.IsNullOrWhiteSpace(kidsInfo.KidsInfoGuid) ? Guid.NewGuid().ToString("N") : kidsInfo.KidsInfoGuid;
+                    var isNewKidContact = string.IsNullOrWhiteSpace(kidsInfo.KidsInfoGuid);
+                    kid.KidsInfoGuid = isNewKidContact ? Guid.NewGuid().ToString("N") : kidsInfo.KidsInfoGuid;
                     kid.FamilyContactGuid = familyContact.FamilyContactGuid;
                     kid.FirstName = string.IsNullOrWhiteSpace(kidsInfo.FirstName) ? string.Empty : kidsInfo.FirstName;
                     kid.Age = kidsInfo.Age.HasValue ? kidsInfo.Age.Value : 0;
@@ -284,7 +339,8 @@ namespace PN2016.Controllers
 
             if(!string.IsNullOrEmpty(familyContactModel.FamilyPicFileName))
             {
-                viewModel.FamilyPicFilePath = "https://nsnane.blob.core.windows.net/profilepic/" + familyContactModel.FamilyPicFileName;
+                viewModel.FamilyPicFilePath =
+                    string.Format("{0}/{1}", AzureFileStorage.ContainerPath, familyContactModel.FamilyPicFileName);
             }
             
             if (familyContactModel.Kids == null || familyContactModel.Kids.Count == 0)
@@ -294,6 +350,7 @@ namespace PN2016.Controllers
             {
                 var kid = new KidsViewModel
                 {
+                    KidsInfoGuid = kidsDBModel.KidsInfoGuid,
                     FirstName = kidsDBModel.FirstName,
                     Age = kidsDBModel.Age,
                     Gender = kidsDBModel.Gender
@@ -324,16 +381,39 @@ namespace PN2016.Controllers
             };
         }
 
-        public bool SendPN2016Message(string ToEmailAddress, string name, string familyGuid)
+        public bool SendCreateConfirmMsg(string ToEmailAddress, string name, string familyGuid)
         {
             string subject = "Thanks for registering.";
             var viewLink = "http://nsna-ne.azurewebsites.net/directory/detail/" + familyGuid;
             StringBuilder htmlBuilder = new StringBuilder();
             htmlBuilder.AppendFormat("Hi {0}, <br/>", name);
-            htmlBuilder.AppendFormat("Thanks for adding your contact info to 2016 Directory.<br/>You can view the details here - <a href='{0}'>{0}</a><br/>", viewLink );
-            htmlBuilder.Append("We are very excited to meet you all in person during our Pillayar Nonbu event.<br/>");
+            htmlBuilder.AppendFormat("Thanks for adding your contact info to NSNA-NE Directory.<br/>You can view the details here - <a href='{0}'>{0}</a><br/>", viewLink );
             htmlBuilder.AppendFormat("For more up to date information, Please visit <a href='{0}'>{0}</a><br/><br/>", "http://nsna-ne.azurewebsites.net/");
-            htmlBuilder.Append("Thanks, <br/>2016 Pillayar Nonbu Team");
+            htmlBuilder.Append("Thanks, <br/>NSNA Team");
+
+            var ToAddress = new MailAddress(ToEmailAddress, name);
+            var from = FromAddress;
+            var status = false;
+            using (var mailMessage = new MailMessage(from, ToAddress))
+            {
+                mailMessage.Subject = subject;
+                mailMessage.Body = htmlBuilder.ToString();
+                mailMessage.IsBodyHtml = true;
+                GMailClient.Send(mailMessage);
+                status = true;
+            }
+            return status;
+        }
+
+        public bool SendEditConfirmMsg(string ToEmailAddress, string name, string familyGuid)
+        {
+            string subject = "Thanks for updating your info.";
+            var viewLink = "http://nsna-ne.azurewebsites.net/directory/detail/" + familyGuid;
+            StringBuilder htmlBuilder = new StringBuilder();
+            htmlBuilder.AppendFormat("Hi {0}, <br/>", name);
+            htmlBuilder.AppendFormat("Thanks for updating your contact info to NSNA-NE Directory.<br/>You can view the details here - <a href='{0}'>{0}</a><br/>", viewLink);
+            htmlBuilder.AppendFormat("For more up to date information, Please visit <a href='{0}'>{0}</a><br/><br/>", "http://nsna-ne.azurewebsites.net/");
+            htmlBuilder.Append("Thanks, <br/>NSNA Team");
 
             var ToAddress = new MailAddress(ToEmailAddress, name);
             var from = FromAddress;
@@ -373,6 +453,18 @@ namespace PN2016.Controllers
             }
         }
 
+        public void UpdateFamilyInfo(FamilyInfoDBModel model)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionstring))
+            {
+                connection.Open();
+                InsertOrUpdateFamilyContact(connection, model, () => GetFamilyInfoUpdateQuery(model.Spouse != null));
+                DeleteKidsInfo(connection, model);
+                InsertOrUpdateKidsInfo(connection, model, () => GetKidsInfoInsertQuery());
+                connection.Close();
+            }
+        }
+
         private string GetFamilyInfoInsertQuery(bool married)
         {
             string commonfields = "FamilyContactGuid, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
@@ -392,6 +484,26 @@ namespace PN2016.Controllers
             string kidsParams = "@KidsInfoGuid,@FamilyContactGuid,@FirstName,@Age,@Gender,@CreatedOn,@LastModifiedOn";
             string query = "INSERT INTO dbo.KidsInfo (" + kidsFields + ") VALUES (" + kidsParams + ")";
             return query;
+        }
+
+        private string GetFamilyInfoUpdateQuery(bool married)
+        {
+            string commonfields = "FirstName = @FirstName, Lastname = @Lastname, Gender = @Gender, Email = @Email, HomePhone = @HomePhone, MobilePhone = @MobilePhone, Address = @Address, City = @City, State = @State, ZipCode = @ZipCode, Kovil = @Kovil, KovilPirivu = @KovilPirivu, NativePlace = @NativePlace, MaritalStatus = @MaritalStatus, FamilyPicFileName = @FamilyPicFileName";
+            string spousefields = "SpouseFirstName = @SpouseFirstName, SpouseLastName = @SpouseLastName, SpouseEmail = @SpouseEmail, SpouseMobilePhone = @SpouseMobilePhone, SpouseKovil = @SpouseKovil, SpouseKovilPirivu = @SpouseKovilPirivu, SpouseNativePlace = @SpouseNativePlace";
+            string query = "UPDATE dbo.FamilyContact  SET " + commonfields + ", LastModifiedOn= @LastModifiedOn where FamilyContactGuid = @FamilyContactGuid";
+            if (married)
+                query = "UPDATE dbo.FamilyContact  SET " + commonfields + "," + spousefields + ", LastModifiedOn= @LastModifiedOn where FamilyContactGuid = @FamilyContactGuid";
+            return query;
+        }
+
+        private void DeleteKidsInfo(SqlConnection connection, FamilyInfoDBModel model)
+        {
+            string query = "Delete from KidsInfo where FamilyContactGuid= @FamilyContactGuid";
+            using (SqlCommand cmd = new SqlCommand(query, connection))
+            {
+                cmd.Parameters.Add("@FamilyContactGuid", SqlDbType.VarChar, 128).Value = model.FamilyContactGuid;
+                cmd.ExecuteNonQuery();
+            }
         }
 
         private void InsertOrUpdateFamilyContact(SqlConnection connection, FamilyInfoDBModel model, Func<string> getQuery)
@@ -582,18 +694,28 @@ namespace PN2016.Controllers
 
     public class AzureFileStorage
     {
-        private CloudStorageAccount storageAccount; 
+        private CloudStorageAccount storageAccount;
+        private string blobContainerName;
+
         public AzureFileStorage()
         {
             storageAccount = CloudStorageAccount.Parse(
                  CloudConfigurationManager.GetSetting("AzureStorage"));
+            blobContainerName = ConfigurationManager.AppSettings["AzureBlobContainer"];
+        }
+        
+        public static string ContainerPath
+        {
+            get
+            {
+                return string.Format("{0}/{1}", ConfigurationManager.AppSettings["AzureBlobPath"], ConfigurationManager.AppSettings["AzureBlobContainer"]);
+            }
         }
 
         public bool UploadFile(string fileName, Stream mediaStream)
         {
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-            CloudBlobContainer container = blobClient.GetContainerReference("profilepic");
-            //CloudBlobContainer container = blobClient.GetContainerReference("profilepic-test");
+            CloudBlobContainer container = blobClient.GetContainerReference(blobContainerName);
             if (!container.Exists()) return false;
             CloudBlockBlob imageBlob = container.GetBlockBlobReference(fileName);
             imageBlob.UploadFromStream(mediaStream);
