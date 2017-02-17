@@ -432,30 +432,30 @@ namespace PN2016.Controllers
 
     public class ContactInfoDB
     {
-        string connectionstring;
+        readonly string _connectionstring;
         public ContactInfoDB()
         {
-            connectionstring = ConfigurationManager.ConnectionStrings["AzureDB"].ConnectionString;
+            _connectionstring = ConfigurationManager.ConnectionStrings["AzureDB"].ConnectionString;
         }
         public ContactInfoDB(string CSName)
         {
-            connectionstring = ConfigurationManager.ConnectionStrings[CSName].ConnectionString;
+            _connectionstring = ConfigurationManager.ConnectionStrings[CSName].ConnectionString;
         }
 
         public void InsertFamilyInfo(FamilyInfoDBModel model)
         {
-            using (SqlConnection connection = new SqlConnection(connectionstring))
+            using (SqlConnection connection = new SqlConnection(_connectionstring))
             {
                 connection.Open();
                 InsertOrUpdateFamilyContact(connection, model, () => GetFamilyInfoInsertQuery(model.Spouse != null));
-                InsertOrUpdateKidsInfo(connection, model, () => GetKidsInfoInsertQuery());
+                InsertOrUpdateKidsInfo(connection, model, GetKidsInfoInsertQuery);
                 connection.Close();
             }
         }
 
         public void UpdateFamilyInfo(FamilyInfoDBModel model)
         {
-            using (SqlConnection connection = new SqlConnection(connectionstring))
+            using (SqlConnection connection = new SqlConnection(_connectionstring))
             {
                 connection.Open();
                 InsertOrUpdateFamilyContact(connection, model, () => GetFamilyInfoUpdateQuery(model.Spouse != null));
@@ -570,7 +570,7 @@ namespace PN2016.Controllers
         public FamilyInfoDBModel SelectWithKidsInfo(string id)
         {
             FamilyInfoDBModel familyDBModel = new FamilyInfoDBModel();
-            using (SqlConnection connection = new SqlConnection(connectionstring))
+            using (SqlConnection connection = new SqlConnection(_connectionstring))
             {
                 connection.Open();
                 var fields = "FamilyContactGuid, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
@@ -657,7 +657,7 @@ namespace PN2016.Controllers
         public List<ContactListViewModel> SelectAllforList()
         {
             List<ContactListViewModel> contacts = new List<ContactListViewModel>();
-            using (SqlConnection connection = new SqlConnection(connectionstring))
+            using (SqlConnection connection = new SqlConnection(_connectionstring))
             {
                 connection.Open();
                 var fields = "FamilyContactGuid, FirstName, Lastname, Gender, Email, City, State,Kovil, KovilPirivu, NativePlace,MaritalStatus";
@@ -694,28 +694,29 @@ namespace PN2016.Controllers
 
     public class AzureFileStorage
     {
-        private CloudStorageAccount storageAccount;
-        private string blobContainerName;
+        private readonly CloudStorageAccount _storageAccount;
+        private readonly string _blobContainerName;
 
         public AzureFileStorage()
         {
-            storageAccount = CloudStorageAccount.Parse(
+            _storageAccount = CloudStorageAccount.Parse(
                  CloudConfigurationManager.GetSetting("AzureStorage"));
-            blobContainerName = ConfigurationManager.AppSettings["AzureBlobContainer"];
+            _blobContainerName = ConfigurationManager.AppSettings["AzureBlobContainer"];
         }
         
         public static string ContainerPath
         {
             get
             {
-                return string.Format("{0}/{1}", ConfigurationManager.AppSettings["AzureBlobPath"], ConfigurationManager.AppSettings["AzureBlobContainer"]);
+                return
+                    $"{ConfigurationManager.AppSettings["AzureBlobPath"]}/{ConfigurationManager.AppSettings["AzureBlobContainer"]}";
             }
         }
 
         public bool UploadFile(string fileName, Stream mediaStream)
         {
-            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-            CloudBlobContainer container = blobClient.GetContainerReference(blobContainerName);
+            CloudBlobClient blobClient = _storageAccount.CreateCloudBlobClient();
+            CloudBlobContainer container = blobClient.GetContainerReference(_blobContainerName);
             if (!container.Exists()) return false;
             CloudBlockBlob imageBlob = container.GetBlockBlobReference(fileName);
             imageBlob.UploadFromStream(mediaStream);

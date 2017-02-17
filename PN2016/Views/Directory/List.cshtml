@@ -3,6 +3,7 @@
     ViewBag.Title = "Contact List";
 }
 <h2>Contact List</h2>
+<h4>Total : @Model.Count()</h4>
 <section>
     <div class="12u 12u$(medium)">
         <div class="table-wrapper">
@@ -21,7 +22,7 @@
                 <tbody>
                     @foreach (var item in Model)
                     {
-                        var location = string.Format("{0}, {1}", item.City, item.State);
+                        var location = $"{item.City}, {item.State}";
                         <tr>
                             <td>@item.FirstName</td>
                             <td>@item.LastName</td>
