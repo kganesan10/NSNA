@@ -2,3 +2,11 @@
   color: #b94a48;
   font-weight: bold;
 }
+
+@media print {
+  table {float: none !important; }
+  div { float: none !important; }
+  footer {page-break-after: always;}
+  .page-nobreak { page-break-inside: avoid; page-break-before:auto; }
+  .dont-print { display: none; }  
+}

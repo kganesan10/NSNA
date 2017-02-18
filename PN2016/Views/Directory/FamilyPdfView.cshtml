@@ -1,0 +1,80 @@
+﻿@using PN2016.Controllers
+@model PN2016.DBModels.FamilyInfoDBModel
+<div class="page-nobreak">
+    <table width="100%">
+        <tr>
+            <td width="70%" valign="top" align="left">
+                <table width="100%">
+                    <tr>
+                        <td width="50%" valign="top" align="left">
+                            <table width="100%">
+                                <tr><td align="left">@($"{Model.FirstName}  {Model.LastName}")</td></tr>
+                                <tr><td align="left">@Model.Email</td></tr>
+                                <tr><td align="left">Home: @Model.HomePhone</td></tr>
+                                <tr><td align="left">@(String.IsNullOrEmpty(Model.MobilePhone) ? string.Empty : "Mobile:" + Model.MobilePhone)</td></tr>
+                                <tr><td align="left">@Model.Kovil - @Model.KovilPirivu</td></tr>
+                                <tr><td align="left">@Model.NativePlace</td></tr>
+                            </table>
+                        </td>
+                        <td width="50%" valign="top" align="left">
+                            @if (Model.MaritalStatus == "M" && Model.Spouse != null)
+                            {
+                                var spouse = Model.Spouse;
+                                <table width="100%">
+                                    <tr><td align="left">@($"{spouse.FirstName} {spouse.LastName}")</td></tr>
+                                    <tr><td align="left">@spouse.Email</td></tr>
+                                    <tr><td align="left">@(String.IsNullOrEmpty(spouse.MobilePhone) ? string.Empty : "Mobile:" + spouse.MobilePhone)</td></tr>
+                                    <tr><td align="left">@spouse.Kovil - @spouse.KovilPirivu</td></tr>
+                                    <tr><td align="left">@spouse.NativePlace</td></tr>
+                                </table>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" valign="top" align="left">
+                            <table width="100%">
+                                <tr><td align="left">@Model.Address</td></tr>
+                                <tr><td align="left">@($"{Model.City},{Model.State} - {Model.ZipCode}")</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" valign="top" align="left">
+                            <table width="100%">
+                                @{
+                                    if (Model.Kids != null && Model.Kids.Count > 0)
+                                    {
+                                        <tr><td align="left" colspan="3"><b>Kids Info</b></td></tr>
+                                        <tr>
+                                            <td width="50%" align="left">Name</td>
+                                            <td width="25%" align="left">Age</td>
+                                            <td width="25%" align="left">Gender</td>
+                                        </tr>
+                                        foreach (var kid in Model.Kids.OrderBy(t => t.Age))
+                                        {
+                                            var kidGender = kid.Gender == "M" ? "Male" : "Female";
+                                            <tr>
+                                                <td width="50%" align="left">@kid.FirstName</td>
+                                                <td width="25%" align="left">@kid.Age</td>
+                                                <td width="25%" align="left">@kidGender</td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td width="30%" align="center">
+                @{
+                    if (!string.IsNullOrEmpty(Model.FamilyPicFileName))
+                    {
+                        var imagePath = $"{AzureFileStorage.ContainerPath}/{Model.FamilyPicFileName}";
+                        <img src="@imagePath" alt="family Pic" style="max-height: 300px; max-width: 300px;" />
+                    }
+                }
+            </td>
+        </tr>
+    </table>
+</div>

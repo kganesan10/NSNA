@@ -8,15 +8,19 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
 using System.Web.Mvc;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 
 namespace PN2016.Controllers
 {
-    public class DirectoryController : Controller
+    public class DirectoryController : BaseController
     {
 
         string[] allowedExtension = new string[] { ".jpg", ".png", ".gif", ".jpeg" };
@@ -72,6 +76,72 @@ namespace PN2016.Controllers
         public ActionResult List()
         {
             return View("adminLogin");
+        }
+
+        public ActionResult PdfPreview()
+        {
+            var contacts = new ContactInfoDB().SelectAllFamilyInfo();
+            return View(contacts);
+        }
+        public FileStreamResult PrintPdf()
+        {
+            var outputDoc = new PdfDocument();
+            
+            outputDoc.Info.Title = "NSNA-NE 2017 Directory";
+            outputDoc.Info.Author = "Karuppiah Ganesan";
+            outputDoc.Info.CreationDate = DateTime.Parse("01-01-2017");
+            outputDoc.Info.ModificationDate = DateTime.Today;
+            outputDoc.Info.Subject = "NSNA-NE 2017 Directory";
+            
+            AddPdfPage(GetCoverPageHtml, outputDoc);
+
+            var contacts = new ContactInfoDB().SelectAllFamilyInfo();
+            foreach (var contact in contacts.OrderBy(i => i.FirstName))
+            {
+                AddPdfPage(() => GetContactInfoHtml(contact), outputDoc);
+            }
+
+            AddPdfPage(GetEndPageHtml, outputDoc);
+            
+            MemoryStream ms = new MemoryStream();
+            outputDoc.Save(ms, false);
+            return new FileStreamResult(ms, "application/pdf");
+
+        }
+
+        private void AddPdfPage( Func<string> getHtmlDoc , PdfDocument document)
+        {
+            var htmlDoc = getHtmlDoc();
+            if(htmlDoc == null)
+                return;
+            var generatedPdfDoc = TheArtOfDev.HtmlRenderer.PdfSharp.PdfGenerator.GeneratePdf(htmlDoc, PdfSharp.PageSize.A4);
+            using (var pdfstream = new MemoryStream())
+            {
+                generatedPdfDoc.Save(pdfstream, false);
+                var importedPdfDoc = PdfReader.Open(pdfstream, PdfDocumentOpenMode.Import);
+                foreach (PdfPage pdfPage in importedPdfDoc.Pages)
+                {
+                    document.AddPage(pdfPage);
+                }
+            }
+        }
+
+        private string GetContactInfoHtml(FamilyInfoDBModel familyInfo)
+        {
+           var htmlDoc =  RenderPartialToString("FamilyPdfView", familyInfo);
+           return htmlDoc;
+        }
+
+        private string GetCoverPageHtml()
+        {
+            var htmlDoc = $"<html><body><h2 align='center' style='color:red'>2017 NSNA Nagarathar Directory</h2></body></html>";
+            return htmlDoc;
+        }
+
+        private string GetEndPageHtml()
+        {
+            var htmlDoc = $"<html><body><h2 align='center' style='color:red'>Thanks</h2></body></html>";
+            return htmlDoc;
         }
 
         [HttpPost]
@@ -433,13 +503,15 @@ namespace PN2016.Controllers
     public class ContactInfoDB
     {
         readonly string _connectionstring;
+
         public ContactInfoDB()
         {
             _connectionstring = ConfigurationManager.ConnectionStrings["AzureDB"].ConnectionString;
         }
-        public ContactInfoDB(string CSName)
+
+        public ContactInfoDB(string connectionStringName)
         {
-            _connectionstring = ConfigurationManager.ConnectionStrings[CSName].ConnectionString;
+            _connectionstring = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
         }
 
         public void InsertFamilyInfo(FamilyInfoDBModel model)
@@ -467,14 +539,21 @@ namespace PN2016.Controllers
 
         private string GetFamilyInfoInsertQuery(bool married)
         {
-            string commonfields = "FamilyContactGuid, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
-            string commonParams = "@FamilyContactGuid, @FirstName, @Lastname, @Gender, @Email, @HomePhone, @MobilePhone, @Address, @City, @State, @ZipCode, @Kovil, @KovilPirivu, @NativePlace, @MaritalStatus,@FamilyPicFileName";
-            string spousefields = "SpouseFirstName,SpouseLastName,SpouseEmail,SpouseMobilePhone,SpouseKovil,SpouseKovilPirivu,SpouseNativePlace";
-            string spouseParams = "@SpouseFirstName,@SpouseLastName,@SpouseEmail,@SpouseMobilePhone,@SpouseKovil,@SpouseKovilPirivu,@SpouseNativePlace";
+            string commonfields =
+                "FamilyContactGuid, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
+            string commonParams =
+                "@FamilyContactGuid, @FirstName, @Lastname, @Gender, @Email, @HomePhone, @MobilePhone, @Address, @City, @State, @ZipCode, @Kovil, @KovilPirivu, @NativePlace, @MaritalStatus,@FamilyPicFileName";
+            string spousefields =
+                "SpouseFirstName,SpouseLastName,SpouseEmail,SpouseMobilePhone,SpouseKovil,SpouseKovilPirivu,SpouseNativePlace";
+            string spouseParams =
+                "@SpouseFirstName,@SpouseLastName,@SpouseEmail,@SpouseMobilePhone,@SpouseKovil,@SpouseKovilPirivu,@SpouseNativePlace";
 
-            string query = "INSERT INTO dbo.FamilyContact (" + commonfields + ", CreatedOn, LastModifiedOn) VALUES (" + commonParams + ",@CreatedOn, @LastModifiedOn )";
+            string query = "INSERT INTO dbo.FamilyContact (" + commonfields + ", CreatedOn, LastModifiedOn) VALUES (" +
+                           commonParams + ",@CreatedOn, @LastModifiedOn )";
             if (married)
-                query = "INSERT INTO dbo.FamilyContact (" + commonfields + "," + spousefields + ", CreatedOn, LastModifiedOn) VALUES (" + commonParams + "," + spouseParams + ",@CreatedOn,@LastModifiedOn )";
+                query = "INSERT INTO dbo.FamilyContact (" + commonfields + "," + spousefields +
+                        ", CreatedOn, LastModifiedOn) VALUES (" + commonParams + "," + spouseParams +
+                        ",@CreatedOn,@LastModifiedOn )";
             return query;
         }
 
@@ -488,11 +567,15 @@ namespace PN2016.Controllers
 
         private string GetFamilyInfoUpdateQuery(bool married)
         {
-            string commonfields = "FirstName = @FirstName, Lastname = @Lastname, Gender = @Gender, Email = @Email, HomePhone = @HomePhone, MobilePhone = @MobilePhone, Address = @Address, City = @City, State = @State, ZipCode = @ZipCode, Kovil = @Kovil, KovilPirivu = @KovilPirivu, NativePlace = @NativePlace, MaritalStatus = @MaritalStatus, FamilyPicFileName = @FamilyPicFileName";
-            string spousefields = "SpouseFirstName = @SpouseFirstName, SpouseLastName = @SpouseLastName, SpouseEmail = @SpouseEmail, SpouseMobilePhone = @SpouseMobilePhone, SpouseKovil = @SpouseKovil, SpouseKovilPirivu = @SpouseKovilPirivu, SpouseNativePlace = @SpouseNativePlace";
-            string query = "UPDATE dbo.FamilyContact  SET " + commonfields + ", LastModifiedOn= @LastModifiedOn where FamilyContactGuid = @FamilyContactGuid";
+            string commonfields =
+                "FirstName = @FirstName, Lastname = @Lastname, Gender = @Gender, Email = @Email, HomePhone = @HomePhone, MobilePhone = @MobilePhone, Address = @Address, City = @City, State = @State, ZipCode = @ZipCode, Kovil = @Kovil, KovilPirivu = @KovilPirivu, NativePlace = @NativePlace, MaritalStatus = @MaritalStatus, FamilyPicFileName = @FamilyPicFileName";
+            string spousefields =
+                "SpouseFirstName = @SpouseFirstName, SpouseLastName = @SpouseLastName, SpouseEmail = @SpouseEmail, SpouseMobilePhone = @SpouseMobilePhone, SpouseKovil = @SpouseKovil, SpouseKovilPirivu = @SpouseKovilPirivu, SpouseNativePlace = @SpouseNativePlace";
+            string query = "UPDATE dbo.FamilyContact  SET " + commonfields +
+                           ", LastModifiedOn= @LastModifiedOn where FamilyContactGuid = @FamilyContactGuid";
             if (married)
-                query = "UPDATE dbo.FamilyContact  SET " + commonfields + "," + spousefields + ", LastModifiedOn= @LastModifiedOn where FamilyContactGuid = @FamilyContactGuid";
+                query = "UPDATE dbo.FamilyContact  SET " + commonfields + "," + spousefields +
+                        ", LastModifiedOn= @LastModifiedOn where FamilyContactGuid = @FamilyContactGuid";
             return query;
         }
 
@@ -506,7 +589,8 @@ namespace PN2016.Controllers
             }
         }
 
-        private void InsertOrUpdateFamilyContact(SqlConnection connection, FamilyInfoDBModel model, Func<string> getQuery)
+        private void InsertOrUpdateFamilyContact(SqlConnection connection, FamilyInfoDBModel model,
+            Func<string> getQuery)
         {
             string query = getQuery();
             using (SqlCommand cmd = new SqlCommand(query, connection))
@@ -518,24 +602,34 @@ namespace PN2016.Controllers
                 cmd.Parameters.Add("@Gender", SqlDbType.VarChar, 1).Value = model.Gender;
                 cmd.Parameters.Add("@Email", SqlDbType.VarChar, 128).Value = model.Email;
                 cmd.Parameters.Add("@HomePhone", SqlDbType.VarChar, 25).Value = model.HomePhone;
-                cmd.Parameters.Add("@MobilePhone", SqlDbType.VarChar, 25).Value = string.IsNullOrEmpty(model.MobilePhone) ? Convert.DBNull : model.MobilePhone;
-                cmd.Parameters.Add("@Address", SqlDbType.VarChar, 128).Value = string.IsNullOrEmpty(model.Address) ? Convert.DBNull : model.Address;
+                cmd.Parameters.Add("@MobilePhone", SqlDbType.VarChar, 25).Value = string.IsNullOrEmpty(model.MobilePhone)
+                    ? Convert.DBNull
+                    : model.MobilePhone;
+                cmd.Parameters.Add("@Address", SqlDbType.VarChar, 128).Value = string.IsNullOrEmpty(model.Address)
+                    ? Convert.DBNull
+                    : model.Address;
                 cmd.Parameters.Add("@City", SqlDbType.VarChar, 128).Value = model.City;
                 cmd.Parameters.Add("@State", SqlDbType.VarChar, 128).Value = model.State;
-                cmd.Parameters.Add("@ZipCode", SqlDbType.VarChar, 25).Value = string.IsNullOrEmpty(model.ZipCode) ? Convert.DBNull : model.ZipCode;
+                cmd.Parameters.Add("@ZipCode", SqlDbType.VarChar, 25).Value = string.IsNullOrEmpty(model.ZipCode)
+                    ? Convert.DBNull
+                    : model.ZipCode;
                 cmd.Parameters.Add("@Kovil", SqlDbType.VarChar, 50).Value = model.Kovil;
                 cmd.Parameters.Add("@KovilPirivu", SqlDbType.VarChar, 50).Value = model.KovilPirivu;
                 cmd.Parameters.Add("@NativePlace", SqlDbType.VarChar, 128).Value = model.NativePlace;
                 cmd.Parameters.Add("@MaritalStatus", SqlDbType.VarChar, 1).Value = model.MaritalStatus;
-                cmd.Parameters.Add("FamilyPicFileName", SqlDbType.VarChar, 128).Value = string.IsNullOrEmpty(model.FamilyPicFileName) ? Convert.DBNull : model.FamilyPicFileName;
+                cmd.Parameters.Add("FamilyPicFileName", SqlDbType.VarChar, 128).Value =
+                    string.IsNullOrEmpty(model.FamilyPicFileName) ? Convert.DBNull : model.FamilyPicFileName;
                 if (model.Spouse != null)
                 {
                     var spouse = model.Spouse;
                     cmd.Parameters.Add("@SpouseFirstName", SqlDbType.VarChar, 50).Value = spouse.FirstName;
                     cmd.Parameters.Add("@SpouseLastName", SqlDbType.VarChar, 50).Value = spouse.LastName;
 
-                    cmd.Parameters.Add("@SpouseEmail", SqlDbType.VarChar, 128).Value = string.IsNullOrEmpty(spouse.Email) ? Convert.DBNull : spouse.Email;
-                    cmd.Parameters.Add("@SpouseMobilePhone", SqlDbType.VarChar, 25).Value = string.IsNullOrEmpty(spouse.MobilePhone) ? Convert.DBNull : spouse.MobilePhone;
+                    cmd.Parameters.Add("@SpouseEmail", SqlDbType.VarChar, 128).Value = string.IsNullOrEmpty(spouse.Email)
+                        ? Convert.DBNull
+                        : spouse.Email;
+                    cmd.Parameters.Add("@SpouseMobilePhone", SqlDbType.VarChar, 25).Value =
+                        string.IsNullOrEmpty(spouse.MobilePhone) ? Convert.DBNull : spouse.MobilePhone;
 
                     cmd.Parameters.Add("@SpouseKovil", SqlDbType.VarChar, 50).Value = spouse.Kovil;
                     cmd.Parameters.Add("@SpouseKovilPirivu", SqlDbType.VarChar, 50).Value = spouse.KovilPirivu;
@@ -573,9 +667,12 @@ namespace PN2016.Controllers
             using (SqlConnection connection = new SqlConnection(_connectionstring))
             {
                 connection.Open();
-                var fields = "FamilyContactGuid, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
-                var spouseFields = "SpouseFirstName,SpouseLastName,SpouseEmail,SpouseMobilePhone,SpouseKovil,SpouseKovilPirivu,SpouseNativePlace";
-                string query = "SELECT " + fields + ","+ spouseFields + ", CreatedOn, LastModifiedOn FROM FamilyContact WHERE FamilyContactGuid = @FamilyContactGuid";
+                var fields =
+                    "FamilyContactGuid, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
+                var spouseFields =
+                    "SpouseFirstName,SpouseLastName,SpouseEmail,SpouseMobilePhone,SpouseKovil,SpouseKovilPirivu,SpouseNativePlace";
+                string query = "SELECT " + fields + "," + spouseFields +
+                               ", CreatedOn, LastModifiedOn FROM FamilyContact WHERE FamilyContactGuid = @FamilyContactGuid";
                 using (SqlCommand cmd = new SqlCommand(query, connection))
                 {
                     cmd.Parameters.Add("@FamilyContactGuid", SqlDbType.VarChar, 128).Value = id;
@@ -585,49 +682,15 @@ namespace PN2016.Controllers
                         {
                             while (reader.Read())
                             {
-                                familyDBModel.FamilyContactGuid = reader.GetString(0);
-                                familyDBModel.FirstName = reader.GetString(1);
-                                familyDBModel.LastName = reader.GetString(2);
-                                familyDBModel.Gender = reader.GetString(3);
-
-                                familyDBModel.Email = reader.GetString(4);
-                                familyDBModel.HomePhone = reader.GetString(5);
-                                familyDBModel.MobilePhone = reader.IsDBNull(6) ? null : reader.GetString(6);
-
-                                familyDBModel.Address = reader.IsDBNull(7) ? null : reader.GetString(7);
-                                familyDBModel.City = reader.GetString(8);
-                                familyDBModel.State = reader.GetString(9);
-                                familyDBModel.ZipCode = reader.IsDBNull(10) ? null : reader.GetString(10);
-
-                                familyDBModel.Kovil = reader.GetString(11);
-                                familyDBModel.KovilPirivu = reader.GetString(12);
-                                familyDBModel.NativePlace = reader.GetString(13);
-                                familyDBModel.MaritalStatus = reader.GetString(14);
-                                familyDBModel.FamilyPicFileName = reader.IsDBNull(15) ? null : reader.GetString(15);
-
-                                if (familyDBModel.MaritalStatus == "M")
-                                {
-                                    familyDBModel.Spouse = new SpouseInfoDBModel();
-                                    familyDBModel.Spouse.FirstName = reader.GetString(16);
-                                    familyDBModel.Spouse.LastName = reader.GetString(17);
-
-                                    familyDBModel.Spouse.Email = reader.IsDBNull(18) ? null : reader.GetString(18); ;
-                                    familyDBModel.Spouse.MobilePhone = reader.IsDBNull(19) ? null : reader.GetString(19); ;
-
-                                    familyDBModel.Spouse.Kovil = reader.GetString(20);
-                                    familyDBModel.Spouse.KovilPirivu = reader.GetString(21);
-                                    familyDBModel.Spouse.NativePlace = reader.GetString(22);
-                                }
-
-                                familyDBModel.CreatedOn = reader.IsDBNull(23) ? DateTime.MinValue : reader.GetDateTime(23);
-                                familyDBModel.LastModifiedOn = reader.IsDBNull(24) ? DateTime.MinValue : reader.GetDateTime(24);
+                                LoadFamilyInfoDBModel(familyDBModel, reader);
                             }
                         }
                         reader.Close();
                     }
                 }
-                var kidsField = "KidsInfoGuid,FirstName,Age,Gender";
-                string kidsInfoQuery = "SELECT " + kidsField + " FROM KidsInfo WHERE FamilyContactGuid = @FamilyContactGuid";
+                var kidsField = "FamilyContactGuid,KidsInfoGuid,FirstName,Age,Gender";
+                string kidsInfoQuery = "SELECT " + kidsField +
+                                       " FROM KidsInfo WHERE FamilyContactGuid = @FamilyContactGuid";
                 using (SqlCommand cmd = new SqlCommand(kidsInfoQuery, connection))
                 {
                     cmd.Parameters.Add("@FamilyContactGuid", SqlDbType.VarChar, 128).Value = id;
@@ -638,12 +701,9 @@ namespace PN2016.Controllers
                             familyDBModel.Kids = new List<KidsInfoDBModel>();
                             while (reader.Read())
                             {
-                                var kidsInfo = new KidsInfoDBModel();
-                                kidsInfo.KidsInfoGuid = reader.GetString(0);
-                                kidsInfo.FirstName = reader.IsDBNull(1) ? null : reader.GetString(1);
-                                kidsInfo.Age = reader.GetInt16(2);
-                                kidsInfo.Gender = reader.IsDBNull(3) ? null : reader.GetString(3);
-                                familyDBModel.Kids.Add(kidsInfo);
+                                var kidsInfoDBModel = new KidsInfoDBModel();
+                                LoadKidsInfoDBModel(kidsInfoDBModel,reader);
+                                familyDBModel.Kids.Add(kidsInfoDBModel);
                             }
                         }
                         reader.Close();
@@ -654,14 +714,69 @@ namespace PN2016.Controllers
             return familyDBModel;
         }
 
+        private static void LoadFamilyInfoDBModel(FamilyInfoDBModel familyDBModel, SqlDataReader reader)
+        {
+            familyDBModel.FamilyContactGuid = reader.GetString(0);
+            familyDBModel.FirstName = reader.GetString(1);
+            familyDBModel.LastName = reader.GetString(2);
+            familyDBModel.Gender = reader.GetString(3);
+
+            familyDBModel.Email = reader.GetString(4);
+            familyDBModel.HomePhone = reader.GetString(5);
+            familyDBModel.MobilePhone = reader.IsDBNull(6) ? null : reader.GetString(6);
+
+            familyDBModel.Address = reader.IsDBNull(7) ? null : reader.GetString(7);
+            familyDBModel.City = reader.GetString(8);
+            familyDBModel.State = reader.GetString(9);
+            familyDBModel.ZipCode = reader.IsDBNull(10) ? null : reader.GetString(10);
+
+            familyDBModel.Kovil = reader.GetString(11);
+            familyDBModel.KovilPirivu = reader.GetString(12);
+            familyDBModel.NativePlace = reader.GetString(13);
+            familyDBModel.MaritalStatus = reader.GetString(14);
+            familyDBModel.FamilyPicFileName = reader.IsDBNull(15) ? null : reader.GetString(15);
+
+            if (familyDBModel.MaritalStatus == "M")
+            {
+                familyDBModel.Spouse = new SpouseInfoDBModel();
+                familyDBModel.Spouse.FirstName = reader.GetString(16);
+                familyDBModel.Spouse.LastName = reader.GetString(17);
+
+                familyDBModel.Spouse.Email = reader.IsDBNull(18) ? null : reader.GetString(18);
+                ;
+                familyDBModel.Spouse.MobilePhone = reader.IsDBNull(19) ? null : reader.GetString(19);
+                ;
+
+                familyDBModel.Spouse.Kovil = reader.GetString(20);
+                familyDBModel.Spouse.KovilPirivu = reader.GetString(21);
+                familyDBModel.Spouse.NativePlace = reader.GetString(22);
+            }
+
+            familyDBModel.CreatedOn = reader.IsDBNull(23)
+                ? DateTime.MinValue
+                : reader.GetDateTime(23);
+            familyDBModel.LastModifiedOn = reader.IsDBNull(24)
+                ? DateTime.MinValue
+                : reader.GetDateTime(24);
+        }
+
+        private static void LoadKidsInfoDBModel(KidsInfoDBModel kidsInfoDBModel, SqlDataReader reader)
+        {
+            kidsInfoDBModel.FamilyContactGuid = reader.GetString(0);
+            kidsInfoDBModel.KidsInfoGuid = reader.GetString(1);
+            kidsInfoDBModel.FirstName = reader.IsDBNull(2) ? null : reader.GetString(2);
+            kidsInfoDBModel.Age = reader.GetInt16(3);
+            kidsInfoDBModel.Gender = reader.IsDBNull(4) ? null : reader.GetString(4);
+        }
         public List<ContactListViewModel> SelectAllforList()
         {
             List<ContactListViewModel> contacts = new List<ContactListViewModel>();
             using (SqlConnection connection = new SqlConnection(_connectionstring))
             {
                 connection.Open();
-                var fields = "FamilyContactGuid, FirstName, Lastname, Gender, Email, City, State,Kovil, KovilPirivu, NativePlace,MaritalStatus";
-                string query = "SELECT " + fields +  " FROM FamilyContact Order by CreatedOn desc";
+                var fields =
+                    "FamilyContactGuid, FirstName, Lastname, Gender, Email, City, State,Kovil, KovilPirivu, NativePlace,MaritalStatus";
+                string query = "SELECT " + fields + " FROM FamilyContact Order by CreatedOn desc";
                 using (SqlCommand cmd = new SqlCommand(query, connection))
                 {
                     using (SqlDataReader reader = cmd.ExecuteReader())
@@ -687,6 +802,63 @@ namespace PN2016.Controllers
                         }
                     }
                 }
+            }
+            return contacts;
+        }
+
+        public List<FamilyInfoDBModel> SelectAllFamilyInfo()
+        {
+            List<FamilyInfoDBModel> contacts = new List<FamilyInfoDBModel>();
+            using (SqlConnection connection = new SqlConnection(_connectionstring))
+            {
+                connection.Open();
+                var fields =
+                    "FamilyContactGuid, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
+                var spouseFields =
+                    "SpouseFirstName,SpouseLastName,SpouseEmail,SpouseMobilePhone,SpouseKovil,SpouseKovilPirivu,SpouseNativePlace";
+                string query = "SELECT " + fields + "," + spouseFields +
+                               ", CreatedOn, LastModifiedOn FROM FamilyContact order by FirstName";
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                FamilyInfoDBModel familyDBModel = new FamilyInfoDBModel();
+                                LoadFamilyInfoDBModel(familyDBModel, reader);
+                                contacts.Add(familyDBModel);
+                            }
+                        }
+                    }
+                }
+
+                var kidsField = "FamilyContactGuid,KidsInfoGuid,FirstName,Age,Gender";
+                string kidsInfoQuery = "SELECT " + kidsField + " FROM KidsInfo order by FamilyContactGuid, Age";
+                using (SqlCommand cmd = new SqlCommand(kidsInfoQuery, connection))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                var kidsInfo = new KidsInfoDBModel();
+                                LoadKidsInfoDBModel(kidsInfo,reader);
+                                var familyDBModel = contacts.FirstOrDefault(m => m.FamilyContactGuid == kidsInfo.FamilyContactGuid);
+                                if (familyDBModel != null)
+                                {
+                                    if(familyDBModel.Kids == null)
+                                        familyDBModel.Kids = new List<KidsInfoDBModel>();
+                                    familyDBModel.Kids.Add(kidsInfo);
+                                }
+                            }
+                        }
+                        reader.Close();
+                    }
+                }
+                connection.Close();
             }
             return contacts;
         }

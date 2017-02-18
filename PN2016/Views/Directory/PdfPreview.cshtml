@@ -1,0 +1,24 @@
+﻿@model List<PN2016.DBModels.FamilyInfoDBModel>
+
+@{
+    ViewBag.Title = "PdfPreview";
+    Layout = null;
+}
+<html>
+<head>
+    <title>@ViewBag.Title - NSNA North East</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="~/assets/css/nsna.css" />
+</head>
+<body>
+   @{
+        foreach (var info in Model)
+        {
+            Html.RenderPartial("FamilyPdfView", info);
+            <br />
+            <hr />
+        }
+    }
+</body>
+</html>
