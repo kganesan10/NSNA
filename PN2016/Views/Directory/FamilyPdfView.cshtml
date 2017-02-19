@@ -7,11 +7,15 @@
                 <table width="100%">
                     <tr>
                         <td width="50%" valign="top" align="left">
+                            @{
+                                string FormattedHomePhone = String.Format("{0:(###) ###-####}", double.Parse(Model.HomePhone ?? ""));
+                                string FormatedMobilePhone = String.Format("{0:(###) ###-####}", double.Parse(Model.MobilePhone ?? "0"));
+                            }
                             <table width="100%">
                                 <tr><td align="left">@($"{Model.FirstName}  {Model.LastName}")</td></tr>
                                 <tr><td align="left">@Model.Email</td></tr>
-                                <tr><td align="left">Home: @Model.HomePhone</td></tr>
-                                <tr><td align="left">@(String.IsNullOrEmpty(Model.MobilePhone) ? string.Empty : "Mobile:" + Model.MobilePhone)</td></tr>
+                                <tr><td align="left">Home: @FormattedHomePhone</td></tr>
+                                <tr><td align="left">@(String.IsNullOrEmpty(Model.MobilePhone) ? string.Empty : "Mobile: " + FormatedMobilePhone)</td></tr>
                                 <tr><td align="left">@Model.Kovil - @Model.KovilPirivu</td></tr>
                                 <tr><td align="left">@Model.NativePlace</td></tr>
                             </table>
@@ -20,10 +24,11 @@
                             @if (Model.MaritalStatus == "M" && Model.Spouse != null)
                             {
                                 var spouse = Model.Spouse;
+                                string FormatedSpouseMobilePhone = String.Format("{0:(###) ###-####}", double.Parse(spouse.MobilePhone ?? "0"));
                                 <table width="100%">
                                     <tr><td align="left">@($"{spouse.FirstName} {spouse.LastName}")</td></tr>
                                     <tr><td align="left">@spouse.Email</td></tr>
-                                    <tr><td align="left">@(String.IsNullOrEmpty(spouse.MobilePhone) ? string.Empty : "Mobile:" + spouse.MobilePhone)</td></tr>
+                                    <tr><td align="left">@(String.IsNullOrEmpty(spouse.MobilePhone) ? string.Empty : "Mobile: " + FormatedSpouseMobilePhone)</td></tr>
                                     <tr><td align="left">@spouse.Kovil - @spouse.KovilPirivu</td></tr>
                                     <tr><td align="left">@spouse.NativePlace</td></tr>
                                 </table>
@@ -50,7 +55,7 @@
                                             <td width="25%" align="left">Age</td>
                                             <td width="25%" align="left">Gender</td>
                                         </tr>
-                                        foreach (var kid in Model.Kids.OrderBy(t => t.Age))
+                                        foreach (var kid in Model.Kids.OrderByDescending(t => t.Age))
                                         {
                                             var kidGender = kid.Gender == "M" ? "Male" : "Female";
                                             <tr>

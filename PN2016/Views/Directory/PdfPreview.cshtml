@@ -13,9 +13,9 @@
 </head>
 <body>
    @{
-        foreach (var info in Model)
-        {
-            Html.RenderPartial("FamilyPdfView", info);
+       foreach (var contact in Model.OrderBy(i => i.FirstName))
+       {
+           Html.RenderPartial("FamilyPdfView", contact);
             <br />
             <hr />
         }

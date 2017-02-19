@@ -835,7 +835,7 @@ namespace PN2016.Controllers
                 }
 
                 var kidsField = "FamilyContactGuid,KidsInfoGuid,FirstName,Age,Gender";
-                string kidsInfoQuery = "SELECT " + kidsField + " FROM KidsInfo order by FamilyContactGuid, Age";
+                string kidsInfoQuery = "SELECT " + kidsField + " FROM KidsInfo order by FamilyContactGuid";
                 using (SqlCommand cmd = new SqlCommand(kidsInfoQuery, connection))
                 {
                     using (SqlDataReader reader = cmd.ExecuteReader())
