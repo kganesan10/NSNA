@@ -12,12 +12,63 @@
     <link rel="stylesheet" href="~/assets/css/nsna.css" />
 </head>
 <body>
-   @{
-       foreach (var contact in Model.OrderBy(i => i.FirstName))
-       {
-           Html.RenderPartial("FamilyPdfView", contact);
-           <hr/>
-       }
+    @{
+        double totalPageCount = Math.Ceiling((double)Model.Count / 3);
+        int itemCounter = 0;
+        int pageCounter = 1;
+        foreach (var contact in Model.OrderBy(i => i.FirstName))
+        {
+            Html.RenderPartial("FamilyPdfView", contact);
+            <hr />
+            itemCounter++;
+            if (itemCounter == 3)
+            {
+                <div>
+                    <footer>
+                        <table align="center" width="90%">
+                            <tr>
+                                <td valign="bottom" align="left">
+                                    <br/>
+                                    NSNA - TriState 2017 Directory
+                                </td>
+                                <td valign="bottom" align="right">
+                                    @($"Page: {pageCounter}/{totalPageCount}")
+                                </td>
+                            </tr>
+                        </table>
+                    </footer>
+                </div>
+                itemCounter = 0;
+                pageCounter++;
+            }
+        }
+        if (itemCounter != 0)
+        {
+            for (int k = 0; k < 3 - itemCounter; k++)
+            {
+                <table width="100%" height="305px">
+                    <tr>
+                        <td><br/></td>
+                    </tr>
+                </table>
+            }
+            <hr/>
+            <div>
+                <footer>
+                    <table align="center" width="90%">
+                        <tr>
+                            <td valign="bottom" align="left">
+                                <br />
+                                NSNA - TriState 2017 Directory
+                            </td>
+                            <td valign="bottom" align="right">
+                                @($"Page: {pageCounter}/{totalPageCount}")
+                            </td>
+                        </tr>
+                    </table>
+                </footer>
+            </div>
+        }
     }
 </body>
 </html>
