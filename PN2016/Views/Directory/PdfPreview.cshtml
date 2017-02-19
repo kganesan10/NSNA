@@ -16,9 +16,8 @@
        foreach (var contact in Model.OrderBy(i => i.FirstName))
        {
            Html.RenderPartial("FamilyPdfView", contact);
-            <br />
-            <hr />
-        }
+           <hr/>
+       }
     }
 </body>
 </html>
