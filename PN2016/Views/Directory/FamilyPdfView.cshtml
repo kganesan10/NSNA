@@ -40,7 +40,7 @@
                             <table width="100%">
                                 <tr><td align="left">@Model.Address</td></tr>
                                 <tr><td align="left">@($"{Model.City},{Model.State} - {Model.ZipCode}")</td></tr>
-                                <tr><td align="left" style="font-weight:bold">ID: @($"NSNA-TRI-{Model.FamilyContactId}")
+                                <tr><td align="left">ID: <b>@($"NSNA-TRI-{Model.FamilyContactId:000}")</b></td></tr>
                             </table>
                         </td>
                     </tr>

@@ -375,7 +375,7 @@ namespace PN2016.Controllers
             ContactInfoViewModel viewModel = new ContactInfoViewModel();
 
             viewModel.FamilyContactGuid = familyContactModel.FamilyContactGuid;
-            viewModel.FamilyContactUId = $"NSNA-TRI-{familyContactModel.FamilyContactId:0000}";
+            viewModel.FamilyContactId = familyContactModel.FamilyContactId;
             viewModel.FirstName = familyContactModel.FirstName;
             viewModel.LastName = familyContactModel.LastName;
             viewModel.Gender = familyContactModel.Gender;
@@ -690,7 +690,7 @@ namespace PN2016.Controllers
                 }
                 var kidsField = "FamilyContactGuid,KidsInfoGuid,FirstName,Age,Gender";
                 string kidsInfoQuery = "SELECT " + kidsField +
-                                       " FROM KidsInfo WHERE FamilyContactGuid = @FamilyContactGuid";
+                                       " FROM KidsInfo WHERE FamilyContactGuid = @FamilyContactGuid Order by Age desc";
                 using (SqlCommand cmd = new SqlCommand(kidsInfoQuery, connection))
                 {
                     cmd.Parameters.Add("@FamilyContactGuid", SqlDbType.VarChar, 128).Value = id;

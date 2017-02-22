@@ -10,7 +10,7 @@
             <h3>Family Info:</h3>
             <div class="row uniform" id="primary">
                 <div class="12u 12u$(xsmall)">
-                    <b>NSNA ID</b> : @Html.DisplayFor(model => model.FamilyContactUId)
+                    <b>ID</b> : @($"NSNA-TRI-{Model.FamilyContactId:000}")
                 </div>
                 <div class="6u 12u$(xsmall)">
                     <b>First Name</b> : @Html.DisplayFor(model => model.FirstName)

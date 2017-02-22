@@ -109,7 +109,7 @@ namespace PN2016.Models
 
         public string FamilyContactGuid { get; set; }
 
-        public string FamilyContactUId { get; set; }
+        public int FamilyContactId { get; set; }
     }
 
     public class KidsViewModel
