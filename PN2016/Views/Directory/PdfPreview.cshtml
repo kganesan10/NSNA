@@ -23,21 +23,6 @@
             itemCounter++;
             if (itemCounter == 3)
             {
-                <div>
-                    <footer>
-                        <table align="center" width="90%">
-                            <tr>
-                                <td valign="bottom" align="left">
-                                    <br/>
-                                    NSNA - TriState 2017 Directory
-                                </td>
-                                <td valign="bottom" align="right">
-                                    @($"Page: {pageCounter}/{totalPageCount}")
-                                </td>
-                            </tr>
-                        </table>
-                    </footer>
-                </div>
                 itemCounter = 0;
                 pageCounter++;
             }
@@ -54,11 +39,11 @@
             }
             <hr/>
             <div>
+            <!--
                 <footer>
                     <table align="center" width="90%">
                         <tr>
                             <td valign="bottom" align="left">
-                                <br />
                                 NSNA - TriState 2017 Directory
                             </td>
                             <td valign="bottom" align="right">
@@ -67,6 +52,7 @@
                         </tr>
                     </table>
                 </footer>
+            -->
             </div>
         }
     }
