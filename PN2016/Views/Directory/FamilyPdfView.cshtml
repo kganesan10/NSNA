@@ -12,7 +12,7 @@
                                 string FormatedMobilePhone = String.Format("{0:(###) ###-####}", double.Parse(Model.MobilePhone ?? "0"));
                             }
                             <table width="100%">
-                                <tr><td align="left">@($"{Model.FirstName}  {Model.LastName}")</td></tr>
+                                <tr><td align="left" style="font-weight:bold">@($"{Model.FirstName}  {Model.LastName}")</td></tr>
                                 <tr><td align="left">@Model.Email</td></tr>
                                 <tr><td align="left">Home: @FormattedHomePhone</td></tr>
                                 <tr><td align="left">@(String.IsNullOrEmpty(Model.MobilePhone) ? string.Empty : "Mobile: " + FormatedMobilePhone)</td></tr>
@@ -40,6 +40,7 @@
                             <table width="100%">
                                 <tr><td align="left">@Model.Address</td></tr>
                                 <tr><td align="left">@($"{Model.City},{Model.State} - {Model.ZipCode}")</td></tr>
+                                <tr><td align="left" style="font-weight:bold">ID: @($"NSNA-TRI-{Model.FamilyContactId}")
                             </table>
                         </td>
                     </tr>

@@ -3,10 +3,12 @@
   font-weight: bold;
 }
 
+footer { display: none; }  
+
 @media print {
   table {float: none !important; }
   div { float: none !important; }
-  footer {page-break-after: always;}
+  footer {display: block; page-break-after: always;}
   .page-nobreak { page-break-inside: avoid; page-break-before:auto; }
   .dont-print { display: none; }  
 }

@@ -16,7 +16,7 @@
         double totalPageCount = Math.Ceiling((double)Model.Count / 3);
         int itemCounter = 0;
         int pageCounter = 1;
-        foreach (var contact in Model.OrderBy(i => i.FirstName))
+        foreach (var contact in Model)
         {
             Html.RenderPartial("FamilyPdfView", contact);
             <hr />

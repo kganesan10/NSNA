@@ -6,6 +6,7 @@ namespace PN2016.DBModels
     public class FamilyInfoDBModel
     {
         public string FamilyContactGuid { get; set; }
+        public int FamilyContactId { get; set; }
 
         //Personal Info
         public string FirstName { get; set; }

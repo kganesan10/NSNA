@@ -108,6 +108,8 @@ namespace PN2016.Models
         public string FamilyPicFilePath { get; set; }
 
         public string FamilyContactGuid { get; set; }
+
+        public string FamilyContactUId { get; set; }
     }
 
     public class KidsViewModel

@@ -375,7 +375,7 @@ namespace PN2016.Controllers
             ContactInfoViewModel viewModel = new ContactInfoViewModel();
 
             viewModel.FamilyContactGuid = familyContactModel.FamilyContactGuid;
-
+            viewModel.FamilyContactUId = $"NSNA-TRI-{familyContactModel.FamilyContactId:0000}";
             viewModel.FirstName = familyContactModel.FirstName;
             viewModel.LastName = familyContactModel.LastName;
             viewModel.Gender = familyContactModel.Gender;
@@ -532,7 +532,7 @@ namespace PN2016.Controllers
                 connection.Open();
                 InsertOrUpdateFamilyContact(connection, model, () => GetFamilyInfoUpdateQuery(model.Spouse != null));
                 DeleteKidsInfo(connection, model);
-                InsertOrUpdateKidsInfo(connection, model, () => GetKidsInfoInsertQuery());
+                InsertOrUpdateKidsInfo(connection, model, GetKidsInfoInsertQuery);
                 connection.Close();
             }
         }
@@ -668,7 +668,7 @@ namespace PN2016.Controllers
             {
                 connection.Open();
                 var fields =
-                    "FamilyContactGuid, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
+                    "FamilyContactGuid, FamilyContactId, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
                 var spouseFields =
                     "SpouseFirstName,SpouseLastName,SpouseEmail,SpouseMobilePhone,SpouseKovil,SpouseKovilPirivu,SpouseNativePlace";
                 string query = "SELECT " + fields + "," + spouseFields +
@@ -716,48 +716,48 @@ namespace PN2016.Controllers
 
         private static void LoadFamilyInfoDBModel(FamilyInfoDBModel familyDBModel, SqlDataReader reader)
         {
-            familyDBModel.FamilyContactGuid = reader.GetString(0);
-            familyDBModel.FirstName = reader.GetString(1);
-            familyDBModel.LastName = reader.GetString(2);
-            familyDBModel.Gender = reader.GetString(3);
+            familyDBModel.FamilyContactGuid = reader.GetString(reader.GetOrdinal("FamilyContactGuid"));
+            familyDBModel.FamilyContactId = reader.GetInt32(reader.GetOrdinal("FamilyContactId"));
+            
+            familyDBModel.FirstName = reader.GetString(reader.GetOrdinal("FirstName"));
+            familyDBModel.LastName = reader.GetString(reader.GetOrdinal("Lastname"));
+            familyDBModel.Gender = reader.GetString(reader.GetOrdinal("Gender"));
+            
+            familyDBModel.Email = reader.GetString(reader.GetOrdinal("Email"));
+            familyDBModel.HomePhone = reader.GetString(reader.GetOrdinal("HomePhone"));
+            familyDBModel.MobilePhone = reader.IsDBNull(reader.GetOrdinal("MobilePhone")) ? null : reader.GetString(reader.GetOrdinal("MobilePhone"));
 
-            familyDBModel.Email = reader.GetString(4);
-            familyDBModel.HomePhone = reader.GetString(5);
-            familyDBModel.MobilePhone = reader.IsDBNull(6) ? null : reader.GetString(6);
+            familyDBModel.Address = reader.IsDBNull(reader.GetOrdinal("Address")) ? null : reader.GetString(reader.GetOrdinal("Address"));
+            familyDBModel.City = reader.GetString(reader.GetOrdinal("City"));
+            familyDBModel.State = reader.GetString(reader.GetOrdinal("State"));
+            familyDBModel.ZipCode = reader.IsDBNull(reader.GetOrdinal("ZipCode")) ? null : reader.GetString(reader.GetOrdinal("ZipCode"));
 
-            familyDBModel.Address = reader.IsDBNull(7) ? null : reader.GetString(7);
-            familyDBModel.City = reader.GetString(8);
-            familyDBModel.State = reader.GetString(9);
-            familyDBModel.ZipCode = reader.IsDBNull(10) ? null : reader.GetString(10);
-
-            familyDBModel.Kovil = reader.GetString(11);
-            familyDBModel.KovilPirivu = reader.GetString(12);
-            familyDBModel.NativePlace = reader.GetString(13);
-            familyDBModel.MaritalStatus = reader.GetString(14);
-            familyDBModel.FamilyPicFileName = reader.IsDBNull(15) ? null : reader.GetString(15);
+            familyDBModel.Kovil = reader.GetString(reader.GetOrdinal("Kovil"));
+            familyDBModel.KovilPirivu = reader.GetString(reader.GetOrdinal("KovilPirivu"));
+            familyDBModel.NativePlace = reader.GetString(reader.GetOrdinal("NativePlace"));
+            familyDBModel.MaritalStatus = reader.GetString(reader.GetOrdinal("MaritalStatus"));
+            familyDBModel.FamilyPicFileName = reader.IsDBNull(reader.GetOrdinal("FamilyPicFileName")) ? null : reader.GetString(reader.GetOrdinal("FamilyPicFileName"));
 
             if (familyDBModel.MaritalStatus == "M")
             {
                 familyDBModel.Spouse = new SpouseInfoDBModel();
-                familyDBModel.Spouse.FirstName = reader.GetString(16);
-                familyDBModel.Spouse.LastName = reader.GetString(17);
+                familyDBModel.Spouse.FirstName = reader.GetString(reader.GetOrdinal("SpouseFirstName"));
+                familyDBModel.Spouse.LastName = reader.GetString(reader.GetOrdinal("SpouseLastName"));
 
-                familyDBModel.Spouse.Email = reader.IsDBNull(18) ? null : reader.GetString(18);
-                ;
-                familyDBModel.Spouse.MobilePhone = reader.IsDBNull(19) ? null : reader.GetString(19);
-                ;
+                familyDBModel.Spouse.Email = reader.IsDBNull(reader.GetOrdinal("SpouseEmail")) ? null : reader.GetString(reader.GetOrdinal("SpouseEmail"));
+                familyDBModel.Spouse.MobilePhone = reader.IsDBNull(reader.GetOrdinal("SpouseMobilePhone")) ? null : reader.GetString(reader.GetOrdinal("SpouseMobilePhone"));
 
-                familyDBModel.Spouse.Kovil = reader.GetString(20);
-                familyDBModel.Spouse.KovilPirivu = reader.GetString(21);
-                familyDBModel.Spouse.NativePlace = reader.GetString(22);
+                familyDBModel.Spouse.Kovil = reader.GetString(reader.GetOrdinal("SpouseKovil"));
+                familyDBModel.Spouse.KovilPirivu = reader.GetString(reader.GetOrdinal("SpouseKovilPirivu"));
+                familyDBModel.Spouse.NativePlace = reader.GetString(reader.GetOrdinal("SpouseNativePlace"));
             }
-
-            familyDBModel.CreatedOn = reader.IsDBNull(23)
+            
+            familyDBModel.CreatedOn = reader.IsDBNull(reader.GetOrdinal("CreatedOn"))
                 ? DateTime.MinValue
-                : reader.GetDateTime(23);
-            familyDBModel.LastModifiedOn = reader.IsDBNull(24)
+                : reader.GetDateTime(reader.GetOrdinal("CreatedOn"));
+            familyDBModel.LastModifiedOn = reader.IsDBNull(reader.GetOrdinal("LastModifiedOn"))
                 ? DateTime.MinValue
-                : reader.GetDateTime(24);
+                : reader.GetDateTime(reader.GetOrdinal("LastModifiedOn"));
         }
 
         private static void LoadKidsInfoDBModel(KidsInfoDBModel kidsInfoDBModel, SqlDataReader reader)
@@ -813,11 +813,11 @@ namespace PN2016.Controllers
             {
                 connection.Open();
                 var fields =
-                    "FamilyContactGuid, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
+                    "FamilyContactGuid, FamilyContactId, FirstName, Lastname, Gender, Email, HomePhone, MobilePhone, Address, City, State, ZipCode, Kovil, KovilPirivu, NativePlace,MaritalStatus,FamilyPicFileName";
                 var spouseFields =
                     "SpouseFirstName,SpouseLastName,SpouseEmail,SpouseMobilePhone,SpouseKovil,SpouseKovilPirivu,SpouseNativePlace";
                 string query = "SELECT " + fields + "," + spouseFields +
-                               ", CreatedOn, LastModifiedOn FROM FamilyContact order by FirstName";
+                               ", CreatedOn, LastModifiedOn FROM FamilyContact order by FirstName, LastName";
                 using (SqlCommand cmd = new SqlCommand(query, connection))
                 {
                     using (SqlDataReader reader = cmd.ExecuteReader())
@@ -835,7 +835,7 @@ namespace PN2016.Controllers
                 }
 
                 var kidsField = "FamilyContactGuid,KidsInfoGuid,FirstName,Age,Gender";
-                string kidsInfoQuery = "SELECT " + kidsField + " FROM KidsInfo order by FamilyContactGuid";
+                string kidsInfoQuery = "SELECT " + kidsField + " FROM KidsInfo order by FamilyContactGuid, Age desc";
                 using (SqlCommand cmd = new SqlCommand(kidsInfoQuery, connection))
                 {
                     using (SqlDataReader reader = cmd.ExecuteReader())
