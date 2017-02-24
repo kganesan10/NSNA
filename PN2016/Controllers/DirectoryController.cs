@@ -332,17 +332,18 @@ namespace PN2016.Controllers
             //Attach Spouse
             if (familyContact.MaritalStatus == "M")
             {
-                var spouseInfo = new SpouseInfoDBModel();
-                spouseInfo.FirstName = string.IsNullOrWhiteSpace(model.SpouseFirstName) ? string.Empty : model.SpouseFirstName;
-                spouseInfo.LastName = string.IsNullOrWhiteSpace(model.SpouseLastName) ? string.Empty : model.SpouseLastName;
-
-                spouseInfo.Email = string.IsNullOrWhiteSpace(model.SpouseEmail) ? null : model.SpouseEmail;
-                spouseInfo.MobilePhone = string.IsNullOrWhiteSpace(model.SpouseMobilePhone) ? null : model.SpouseMobilePhone;
-
-                spouseInfo.Kovil = string.IsNullOrWhiteSpace(model.SpouseKovil) ? string.Empty : model.SpouseKovil;
-                spouseInfo.KovilPirivu = string.IsNullOrWhiteSpace(model.SpouseKovilPirivu) ? string.Empty : model.SpouseKovilPirivu;
-                spouseInfo.NativePlace = string.IsNullOrWhiteSpace(model.SpouseNativePlace) ? string.Empty : model.SpouseNativePlace;
-
+                var spouseInfo = new SpouseInfoDBModel
+                {
+                    FirstName = string.IsNullOrWhiteSpace(model.SpouseFirstName) ? string.Empty : model.SpouseFirstName,
+                    LastName = string.IsNullOrWhiteSpace(model.SpouseLastName) ? string.Empty : model.SpouseLastName,
+                    Email = string.IsNullOrWhiteSpace(model.SpouseEmail) ? null : model.SpouseEmail,
+                    MobilePhone = string.IsNullOrWhiteSpace(model.SpouseMobilePhone) ? null : model.SpouseMobilePhone,
+                    Kovil = string.IsNullOrWhiteSpace(model.SpouseKovil) ? string.Empty : model.SpouseKovil,
+                    KovilPirivu =
+                        string.IsNullOrWhiteSpace(model.SpouseKovilPirivu) ? string.Empty : model.SpouseKovilPirivu,
+                    NativePlace =
+                        string.IsNullOrWhiteSpace(model.SpouseNativePlace) ? string.Empty : model.SpouseNativePlace
+                };
                 familyContact.Spouse = spouseInfo;
             }
 
@@ -371,27 +372,25 @@ namespace PN2016.Controllers
             if (familyContactModel == null)
                 return null;
 
-            ContactInfoViewModel viewModel = new ContactInfoViewModel();
-
-            viewModel.FamilyContactGuid = familyContactModel.FamilyContactGuid;
-            viewModel.FamilyContactId = familyContactModel.FamilyContactId;
-            viewModel.FirstName = familyContactModel.FirstName;
-            viewModel.LastName = familyContactModel.LastName;
-            viewModel.Gender = familyContactModel.Gender;
-            viewModel.MaritalStatus = familyContactModel.MaritalStatus;
-
-            viewModel.Email = familyContactModel.Email;
-            viewModel.HomePhone = familyContactModel.HomePhone;
-            viewModel.MobilePhone = familyContactModel.MobilePhone;
-
-            viewModel.Address = familyContactModel.Address;
-            viewModel.City = familyContactModel.City;
-            viewModel.State = familyContactModel.State;
-            viewModel.ZipCode = familyContactModel.ZipCode;
-
-            viewModel.Kovil = familyContactModel.Kovil;
-            viewModel.KovilPirivu = familyContactModel.KovilPirivu;
-            viewModel.NativePlace = familyContactModel.NativePlace;
+            ContactInfoViewModel viewModel = new ContactInfoViewModel
+            {
+                FamilyContactGuid = familyContactModel.FamilyContactGuid,
+                FamilyContactId = familyContactModel.FamilyContactId,
+                FirstName = familyContactModel.FirstName,
+                LastName = familyContactModel.LastName,
+                Gender = familyContactModel.Gender,
+                MaritalStatus = familyContactModel.MaritalStatus,
+                Email = familyContactModel.Email,
+                HomePhone = familyContactModel.HomePhone,
+                MobilePhone = familyContactModel.MobilePhone,
+                Address = familyContactModel.Address,
+                City = familyContactModel.City,
+                State = familyContactModel.State,
+                ZipCode = familyContactModel.ZipCode,
+                Kovil = familyContactModel.Kovil,
+                KovilPirivu = familyContactModel.KovilPirivu,
+                NativePlace = familyContactModel.NativePlace
+            };
             
             if(familyContactModel.Spouse != null && familyContactModel.MaritalStatus == "M")
             {
@@ -409,7 +408,7 @@ namespace PN2016.Controllers
             if(!string.IsNullOrEmpty(familyContactModel.FamilyPicFileName))
             {
                 viewModel.FamilyPicFilePath =
-                    string.Format("{0}/{1}", AzureFileStorage.ContainerPath, familyContactModel.FamilyPicFileName);
+                    $"{AzureFileStorage.ContainerPath}/{familyContactModel.FamilyPicFileName}";
             }
             
             if (familyContactModel.Kids == null || familyContactModel.Kids.Count == 0)
@@ -735,16 +734,22 @@ namespace PN2016.Controllers
 
             if (familyDBModel.MaritalStatus == "M")
             {
-                familyDBModel.Spouse = new SpouseInfoDBModel();
-                familyDBModel.Spouse.FirstName = reader.GetString(reader.GetOrdinal("SpouseFirstName"));
-                familyDBModel.Spouse.LastName = reader.GetString(reader.GetOrdinal("SpouseLastName"));
-
-                familyDBModel.Spouse.Email = reader.IsDBNull(reader.GetOrdinal("SpouseEmail")) ? null : reader.GetString(reader.GetOrdinal("SpouseEmail"));
-                familyDBModel.Spouse.MobilePhone = reader.IsDBNull(reader.GetOrdinal("SpouseMobilePhone")) ? null : reader.GetString(reader.GetOrdinal("SpouseMobilePhone"));
-
-                familyDBModel.Spouse.Kovil = reader.GetString(reader.GetOrdinal("SpouseKovil"));
-                familyDBModel.Spouse.KovilPirivu = reader.GetString(reader.GetOrdinal("SpouseKovilPirivu"));
-                familyDBModel.Spouse.NativePlace = reader.GetString(reader.GetOrdinal("SpouseNativePlace"));
+                familyDBModel.Spouse = new SpouseInfoDBModel
+                {
+                    FirstName = reader.GetString(reader.GetOrdinal("SpouseFirstName")),
+                    LastName = reader.GetString(reader.GetOrdinal("SpouseLastName")),
+                    Email =
+                        reader.IsDBNull(reader.GetOrdinal("SpouseEmail"))
+                            ? null
+                            : reader.GetString(reader.GetOrdinal("SpouseEmail")),
+                    MobilePhone =
+                        reader.IsDBNull(reader.GetOrdinal("SpouseMobilePhone"))
+                            ? null
+                            : reader.GetString(reader.GetOrdinal("SpouseMobilePhone")),
+                    Kovil = reader.GetString(reader.GetOrdinal("SpouseKovil")),
+                    KovilPirivu = reader.GetString(reader.GetOrdinal("SpouseKovilPirivu")),
+                    NativePlace = reader.GetString(reader.GetOrdinal("SpouseNativePlace"))
+                };
             }
             
             familyDBModel.CreatedOn = reader.IsDBNull(reader.GetOrdinal("CreatedOn"))
@@ -780,18 +785,20 @@ namespace PN2016.Controllers
                         {
                             while (reader.Read())
                             {
-                                var contact = new ContactListViewModel();
-                                contact.FamilyContactGuid = reader.GetString(0);
-                                contact.FirstName = reader.GetString(1);
-                                contact.LastName = reader.GetString(2);
-                                contact.Gender = reader.GetString(3);
-                                contact.Email = reader.GetString(4);
-                                contact.City = reader.GetString(5);
-                                contact.State = reader.GetString(6);
-                                contact.Kovil = reader.GetString(7);
-                                contact.KovilPirivu = reader.GetString(8);
-                                contact.NativePlace = reader.GetString(9);
-                                contact.MaritalStatus = reader.GetString(10);
+                                var contact = new ContactListViewModel
+                                {
+                                    FamilyContactGuid = reader.GetString(0),
+                                    FirstName = reader.GetString(1),
+                                    LastName = reader.GetString(2),
+                                    Gender = reader.GetString(3),
+                                    Email = reader.GetString(4),
+                                    City = reader.GetString(5),
+                                    State = reader.GetString(6),
+                                    Kovil = reader.GetString(7),
+                                    KovilPirivu = reader.GetString(8),
+                                    NativePlace = reader.GetString(9),
+                                    MaritalStatus = reader.GetString(10)
+                                };
                                 contacts.Add(contact);
                             }
                         }
