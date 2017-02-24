@@ -433,13 +433,13 @@ namespace PN2016.Controllers
 
     public class GMailDispatcher
     {
-        MailAddress FromAddress;
-        SmtpClient GMailClient;
+        private readonly MailAddress _fromAddress;
+        private readonly SmtpClient _mailClient;
 
         public GMailDispatcher()
         {
-            FromAddress = new MailAddress("nsna.northeast@gmail.com", "NSNA NorthEast");
-            GMailClient = new SmtpClient
+            _fromAddress = new MailAddress("nsna.northeast@gmail.com", "NSNA NorthEast");
+            _mailClient = new SmtpClient
             {
                 Host = "smtp.gmail.com",
                 Port = 587,
@@ -450,7 +450,25 @@ namespace PN2016.Controllers
             };
         }
 
-        public bool SendCreateConfirmMsg(string toEmailAddress, string name, string familyGuid)
+        public void SendMessage(string toEmailAddress, string toDisplayName, string subject, Func<string> messageBuilder)
+        {
+            var message = messageBuilder();
+            SendMessage(toEmailAddress, toDisplayName, subject, message);
+        }
+
+        public void SendMessage(string toEmailAddress, string toDisplayName, string subject, string message)
+        {
+            var toMailAddress = new MailAddress(toEmailAddress, toDisplayName);
+            using (var mailMessage = new MailMessage(_fromAddress, toMailAddress))
+            {
+                mailMessage.Subject = subject;
+                mailMessage.Body = message;
+                mailMessage.IsBodyHtml = true;
+                _mailClient.Send(mailMessage);
+            }
+        }
+        
+        public void SendCreateConfirmMsg(string toEmailAddress, string name, string familyGuid)
         {
             string subject = "Thanks for registering.";
             var viewLink = "http://nsna-ne.azurewebsites.net/directory/detail/" + familyGuid;
@@ -460,21 +478,10 @@ namespace PN2016.Controllers
             htmlBuilder.AppendFormat("For more up to date information, Please visit <a href='{0}'>{0}</a><br/><br/>", "http://nsna-ne.azurewebsites.net/");
             htmlBuilder.Append("Thanks, <br/>NSNA Team");
 
-            var toAddress = new MailAddress(toEmailAddress, name);
-            var from = FromAddress;
-            var status = false;
-            using (var mailMessage = new MailMessage(from, toAddress))
-            {
-                mailMessage.Subject = subject;
-                mailMessage.Body = htmlBuilder.ToString();
-                mailMessage.IsBodyHtml = true;
-                GMailClient.Send(mailMessage);
-                status = true;
-            }
-            return status;
+            SendMessage(toEmailAddress, name, subject, htmlBuilder.ToString());
         }
 
-        public bool SendEditConfirmMsg(string ToEmailAddress, string name, string familyGuid)
+        public void SendEditConfirmMsg(string toEmailAddress, string name, string familyGuid)
         {
             string subject = "Thanks for updating your info.";
             var viewLink = "http://nsna-ne.azurewebsites.net/directory/detail/" + familyGuid;
@@ -484,18 +491,7 @@ namespace PN2016.Controllers
             htmlBuilder.AppendFormat("For more up to date information, Please visit <a href='{0}'>{0}</a><br/><br/>", "http://nsna-ne.azurewebsites.net/");
             htmlBuilder.Append("Thanks, <br/>NSNA Team");
 
-            var toAddress = new MailAddress(ToEmailAddress, name);
-            var from = FromAddress;
-            var status = false;
-            using (var mailMessage = new MailMessage(from, toAddress))
-            {
-                mailMessage.Subject = subject;
-                mailMessage.Body = htmlBuilder.ToString();
-                mailMessage.IsBodyHtml = true;
-                GMailClient.Send(mailMessage);
-                status = true;
-            }
-            return status;
+            SendMessage(toEmailAddress, name, subject, htmlBuilder.ToString());
         }
     }
 
