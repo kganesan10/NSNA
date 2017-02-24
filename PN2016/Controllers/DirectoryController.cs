@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -451,7 +450,7 @@ namespace PN2016.Controllers
             };
         }
 
-        public bool SendCreateConfirmMsg(string ToEmailAddress, string name, string familyGuid)
+        public bool SendCreateConfirmMsg(string toEmailAddress, string name, string familyGuid)
         {
             string subject = "Thanks for registering.";
             var viewLink = "http://nsna-ne.azurewebsites.net/directory/detail/" + familyGuid;
@@ -461,10 +460,10 @@ namespace PN2016.Controllers
             htmlBuilder.AppendFormat("For more up to date information, Please visit <a href='{0}'>{0}</a><br/><br/>", "http://nsna-ne.azurewebsites.net/");
             htmlBuilder.Append("Thanks, <br/>NSNA Team");
 
-            var ToAddress = new MailAddress(ToEmailAddress, name);
+            var toAddress = new MailAddress(toEmailAddress, name);
             var from = FromAddress;
             var status = false;
-            using (var mailMessage = new MailMessage(from, ToAddress))
+            using (var mailMessage = new MailMessage(from, toAddress))
             {
                 mailMessage.Subject = subject;
                 mailMessage.Body = htmlBuilder.ToString();
@@ -485,10 +484,10 @@ namespace PN2016.Controllers
             htmlBuilder.AppendFormat("For more up to date information, Please visit <a href='{0}'>{0}</a><br/><br/>", "http://nsna-ne.azurewebsites.net/");
             htmlBuilder.Append("Thanks, <br/>NSNA Team");
 
-            var ToAddress = new MailAddress(ToEmailAddress, name);
+            var toAddress = new MailAddress(ToEmailAddress, name);
             var from = FromAddress;
             var status = false;
-            using (var mailMessage = new MailMessage(from, ToAddress))
+            using (var mailMessage = new MailMessage(from, toAddress))
             {
                 mailMessage.Subject = subject;
                 mailMessage.Body = htmlBuilder.ToString();
